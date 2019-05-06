@@ -15,7 +15,7 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.io/docs), which offers tutorials, 
 samples, guidance on mobile development, and a full API reference.
 
-## 第二节 入口文件的编写
+## 第02节 入口文件的编写
 
 ```
 class MyApp extends StatelessWidget {
