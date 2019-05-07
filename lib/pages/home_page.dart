@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context) => AlertDialog(title: Text('美女类型不能为空')),
       );
     } else {
-      getHttp(typeText).then((value) {
+      postHttp(typeText).then((value) {
         setState(() {
           showText = value['data']['name'].toString();
         });
@@ -94,6 +94,21 @@ class _HomePageState extends State<HomePage> {
       var param = {'name': typeText};
       response = await Dio().get(
         'https://www.easy-mock.com/mock/5c60131a4bed3a6342711498/baixing/dabaojian',
+        queryParameters: param,
+      );
+      return response.data;
+    } catch (e) {
+      return print(e);
+    }
+  }
+
+  Future postHttp(String typeText) async {
+    try {
+      Response response;
+      // 参数
+      var param = {'name': typeText};
+      response = await Dio().post(
+        'https://www.easy-mock.com/mock/5c60131a4bed3a6342711498/baixing/post_dabaojian',
         queryParameters: param,
       );
       return response.data;

@@ -323,3 +323,60 @@ class _HomePageState extends State<HomePage> {
 2. Future对象的使用
 3. 改变状态和界面的setState的方法应用
 4. TextField Widget的基本使用
+
+# 第07节:dio基础_POST请求的使用
+
+### EasyMock动态参数的实现
+
+EasyMock在工作中我使用的也是比较多，因为要和后台同步开发，后台编写慢的时候，就需要我们先自己设置（应该说是模拟）需要的数据
+
+```
+{
+  success: true,
+  data: {
+    default: "jspang",
+    _req: function({
+      _req
+    }) {
+      return _req
+    },
+    name: function({
+      _req,
+      Mock
+    }) {
+      if (_req.query.name) {
+        return _req.query.name + '走进了房间，来为你亲情服务';
+      } else {
+        return '随便来个妹子，服务就好';
+      }
+    }
+  }
+}
+```
+
+### Dio的POST使用
+
+其实Post的使用非常简单，主题代码并没有什么改动，只是把原来的get换成Post就可以了
+
+```
+Future postHttp(String typeText) async {
+    try {
+      Response response;
+      // 参数
+      var param = {'name': typeText};
+      response = await Dio().post(
+        'https://www.easy-mock.com/mock/5c60131a4bed3a6342711498/baixing/post_dabaojian',
+        queryParameters: param,
+      );
+      return response.data;
+    } catch (e) {
+      return print(e);
+    }
+  }
+```
+
+**本节总结:** 这节课程所学到的知识点.
+
+1. SingleChildScrollView： SingleChildScrollView小部件的使用技巧。
+2. EasyMock动态参数的实现：我们讲解了一个EasyMock动态参数的实现方法。
+3. Dio的Post请求： 学会利用dio的post请求。
