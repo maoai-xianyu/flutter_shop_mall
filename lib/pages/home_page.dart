@@ -72,6 +72,10 @@ class _HomePageState extends State<HomePage> {
     debugPrint('点击选择美女');
     var typeText = textEditingController.text.toString();
     if (typeText == '') {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(title: Text('美女类型不能为空')),
+      );
     } else {
       getHttp(typeText).then((value) {
         setState(() {
