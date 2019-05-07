@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import '../config/http_headers.dart';
+import '../service/service_method.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -8,64 +7,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String showText = '获取极客数据..';
+  String homePageContent = '正在获取数据';
+
+  @override
+  void initState() {
+    getHomePageContent().then((value) {
+      setState(() {
+        homePageContent = value.toString();
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('伪造请求头'),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            child: Column(
-              children: <Widget>[
-                RaisedButton(
-                  child: Text('获取数据'),
-                  onPressed: () {
-                    _showJiKeContent();
-                  },
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                // 显示你选择的
-                Text(
-                  showText,
-                ),
-              ],
-            ),
-          ),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('百姓生活+'),
+      ),
+      body: SingleChildScrollView(
+        child: Text(homePageContent),
       ),
     );
-  }
-
-  void _showJiKeContent() {
-    debugPrint('开始请求极客数据');
-    postHttp().then((value) {
-      setState(() {
-        showText = value['data']['nav'].toString();
-      });
-      debugPrint('得到的数据是 ${value['data']['nav'].toString()}');
-    });
-  }
-
-  Future postHttp() async {
-    try {
-      Response response;
-      Dio dio = new Dio();
-      // 设置请求头
-      dio.options.headers = httpHeadersJK;
-      // 参数
-      response = await dio.post(
-        'https://time.geekbang.org/serv/v1/column/newAll',
-      );
-      debugPrint(response.toString());
-      return response.data;
-    } catch (e) {
-      return print(e);
-    }
   }
 }

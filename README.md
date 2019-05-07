@@ -482,3 +482,61 @@ const httpHeadersJK= {
 
 ### 工具推荐  Fiddler 抓包工具
 
+# 第09节：移动商城数据请求实战（好戏开始）
+
+### 建立网络请求
+
+
+* 在/lib/config文件夹下，建立一个service_url.dart文件,网络配置
+
+```
+const serviceUrl = 'http://v.jspang.com:8088/baixing/';
+const servicePath = {
+  'homePageContent':serviceUrl + 'wxmini/homePageContent', // 商店首页信息
+  'homePageBelowConten':serviceUrl + 'wxmini/homePageBelowConten', // 首页热卖商品
+  'getCategory':serviceUrl + 'wxmini/getCategory',  // 商品类别信息
+  'getMallGoods':serviceUrl + 'wxmini/getMallGoods',  // 商品分类页面商品列表
+  'getGoodDetailById':serviceUrl + 'wxmini/getGoodDetailById',  // 商品详情
+};
+```
+
+* 在/lib/service文件夹下，建立一个service_method.dart文件，网络请求
+
+```
+import "package:dio/dio.dart";
+import 'dart:async';
+import 'dart:io';
+import '../config/service_url.dart';
+// 获取首页主体内容
+
+Future getHomePageContent() async {
+  try {
+    print('开始获取首页数据....');
+    Response response;
+    Dio dio = new Dio();
+    // 表单
+    dio.options.contentType = ContentType.parse(
+      "application/x-www-form-urlencoded",
+    );
+    var formData = {
+      'lon': '115.02932',
+      'lat': '35.76189',
+    };
+    response = await dio.post(servicePath['homePageContent'], data: formData);
+    if (response.statusCode == 200) {
+      return response.data;
+    } else {
+      throw Exception('后端接口出现异常。');
+    }
+  } catch (e) {
+    return print('Error: =======>$e');
+  }
+}
+
+
+```
+
+**本节总结:** 
+
+1. 和后端接口对接的一些实战技巧，这些技巧可以大大增加项目的灵活性和减少维护成本。
+2. 真实项目接口数据的获取，为我们的项目提供后端数据支持。
