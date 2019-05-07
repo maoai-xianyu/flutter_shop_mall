@@ -32,34 +32,36 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: Text('美好人间'),
         ),
-        body: Container(
-          child: Column(
-            children: <Widget>[
-              TextField(
-                controller: textEditingController,
-                decoration: InputDecoration(
-                  labelText: '美女类型',
-                  helperText: '请选择你要的类型',
+        body: SingleChildScrollView(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  controller: textEditingController,
+                  decoration: InputDecoration(
+                    labelText: '美女类型',
+                    helperText: '请选择你要的类型',
+                  ),
+                  autofocus: false,
                 ),
-                autofocus: false,
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              RaisedButton(
-                onPressed: () {
-                  _choiceActionGirl();
-                },
-                child: Text('点击你选择'),
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              // 显示你选择的
-              Text(
-                showText,
-              ),
-            ],
+                SizedBox(
+                  height: 10.0,
+                ),
+                RaisedButton(
+                  onPressed: () {
+                    _choiceActionGirl();
+                  },
+                  child: Text('点击你选择'),
+                ),
+                SizedBox(
+                  height: 10.0,
+                ),
+                // 显示你选择的
+                Text(
+                  showText,
+                ),
+              ],
+            ),
           ),
         ),
       ),
