@@ -380,3 +380,105 @@ Future postHttp(String typeText) async {
 1. SingleChildScrollView： SingleChildScrollView小部件的使用技巧。
 2. EasyMock动态参数的实现：我们讲解了一个EasyMock动态参数的实现方法。
 3. Dio的Post请求： 学会利用dio的post请求。
+
+# 第08节:dio基础_伪造请求头获取数据
+
+在很多时候，后端为了安全都会有一些请求头的限制，只有请求头对了，才能正确返回数据
+
+### 伪造请求头
+
+新建一个文件夹，起名叫作config，然后在里边新建一个文件httpHeaders.dart,把请求头设置好，请求头可以在浏览器中轻松获得，获得后需要进行改造。
+
+```
+
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import '../config/http_headers.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String showText = '获取极客数据..';
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('伪造请求头'),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                RaisedButton(
+                  child: Text('获取数据'),
+                  onPressed: () {
+                    _showJiKeContent();
+                  },
+                ),
+                SizedBox(
+                  height: 10.0,
+                ),
+                // 显示你选择的
+                Text(
+                  showText,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showJiKeContent() {
+    debugPrint('开始请求极客数据');
+    postHttp().then((value) {
+      setState(() {
+        showText = value['data']['nav'].toString();
+      });
+      debugPrint('得到的数据是 ${value['data']['nav'].toString()}');
+    });
+  }
+
+  Future postHttp() async {
+    try {
+      Response response;
+      Dio dio = new Dio();
+      // 设置请求头
+      dio.options.headers = httpHeadersJK;
+      // 参数
+      response = await dio.post(
+        'https://time.geekbang.org/serv/v1/column/newAll',
+      );
+      debugPrint(response.toString());
+      return response.data;
+    } catch (e) {
+      return print(e);
+    }
+  }
+}
+
+// 请求头
+
+const httpHeadersJK= {
+  'Accept': 'application/json, text/plain, */*',
+  'Accept-Encoding': 'gzip, deflate, br',
+  'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+  'Connection': 'keep-alive',
+  'Content-Type': 'application/json',
+  'Cookie': '_ga=GA1.2.1699630603.1550114169; _gid=GA1.2.859327148.1557211766; Hm_lvt_022f847c4e3acd44d4a2481d9187f1e6=1557211767; SERVERID=1fa1f330efedec1559b3abbcb6e30f50|1557211842|1557211764; _gat=1; Hm_lpvt_022f847c4e3acd44d4a2481d9187f1e6=1557211843',
+  'Host': 'time.geekbang.org',
+  'Origin': 'https://time.geekbang.org',
+  'Referer': 'https://time.geekbang.org/',
+  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+};
+
+```
+
+### 工具推荐  Fiddler 抓包工具
+
