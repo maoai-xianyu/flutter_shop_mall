@@ -89,3 +89,75 @@ class MyApp extends StatelessWidget {
 ```
 
 > type:BottomNavigationBarType.fixed,这个是设置底部tab的样式，它有两种样式fixed和shifting
+
+
+# 第05节:dio基础_引入和简单的Get请求
+
+### Dart的第三方Http请求库dio
+
+> dio是一个强大的Dart Http请求库，支持Restful API、 FormData、拦截器、请求取消、Cookie管理、文件上传/下载、超时和自定义适配器等。
+
+### 添加dio依赖：
+
+其实Flutter或者说Dart也为我们提供了第三方包管理工具，就和前端经常使用的npm包管理类似。Dart的包管理文件叫做pubspec.yaml，其实它统管整个项目，操作最多的就是第三方插件和静态文件（文件在项目根目录下）,如果我们要引入第三方包需要在dependencies里写明。例如我们要加入dio,代码如下
+
+```
+dependencies:
+  dio: 2.1.x  #latest version
+```
+
+```
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+
+class DemoDio extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    getHttp();
+    return Center(
+      child: Text('商城获取数据'),
+    );
+  }
+
+  // 异步
+  void getHttp() async {
+    try {
+      Response response;
+      response = await Dio().get(
+          'https://www.easy-mock.com/mock/5c60131a4bed3a6342711498/baixing/dabaojian?name=大胸美女');
+      return print(response);
+    } catch (e) {
+      print(e);
+    }
+  }
+}
+
+
+{
+    "success":true,
+    "data":{
+        "default":"jspang",
+        "_req":{
+            "method":"GET",
+            "url":"/mock/5c60131a4bed3a6342711498/baixing/dabaojian?name=%E5%A4%A7%E8%83%B8%E7%BE%8E%E5%A5%B3",
+            "header":{
+                "host":"www.easy-mock.com",
+                "x-forwarded-for":"219.142.225.18",
+                "x-forwarded-proto":"https",
+                "connection":"close",
+                "content-length":"0",
+                "user-agent":"Dart/2.1 (dart:io)",
+                "accept-encoding":"gzip"
+            }
+        },
+        "name":"大胸美女走进了房间，来为你亲情服务"
+    }
+}
+
+```
+
+**总结：**本节课学会的知识点：
+
+1. 认识Dio库：dio是一个dart的 http请求通用库，目前也是大陆使用最广泛的库，国人开发，完全开源。
+2. flutter的插件包管理：学了引入dio包，并简单的学习了pubspec.yaml的结构和编写注意事项。
+3. get请求的编写：我们以一个充满正能量的小Demo讲述了get请求的实现，并成功的返回了结果。
