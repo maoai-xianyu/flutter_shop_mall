@@ -156,8 +156,170 @@ class DemoDio extends StatelessWidget {
 
 ```
 
-**总结：**本节课学会的知识点：
+**总结：** 本节课学会的知识点：
 
 1. 认识Dio库：dio是一个dart的 http请求通用库，目前也是大陆使用最广泛的库，国人开发，完全开源。
 2. flutter的插件包管理：学了引入dio包，并简单的学习了pubspec.yaml的结构和编写注意事项。
 3. get请求的编写：我们以一个充满正能量的小Demo讲述了get请求的实现，并成功的返回了结果。
+
+
+# 第06节:dio基础_Get请求和动态组件协作
+
+### 生成动态组件
+
+可以使用stful的快捷方式，在VSCode里快速生成StatefulWidget的基本结构，我们只需要改一下类的名字就可以了，就会得到如下代码.
+
+### 加入文本框Widget
+
+
+### Dio的get方法
+布局完成后，可以先编写一下远程接口的调用方法，跟上节课的内容类似，不过这里返回值为一个Future,这个对象支持一个等待回掉方法then
+
+```
+Future getHttp(String TypeText)async{
+    try{
+      Response response;
+      var data={'name':TypeText};
+      response = await Dio().get(
+        "https://www.easy-mock.com/mock/5c60131a4bed3a6342711498/baixing/dabaojian",
+          queryParameters:data
+      );
+      return response.data;
+    }catch(e){
+      return print(e);
+    }
+  }
+```
+
+### 得到数据后的处理
+
+当我们写完内容后，要点击按钮，按钮会调用方法，并进行一定的判断。比如判断文本框是不是为空。然后当后端返回数据时，我们用setState方法更新了数据
+
+```
+void _choiceAction(){
+    print('开始选择你喜欢的类型............');
+    if(typeController.text.toString()==''){
+      showDialog(
+        context: context,
+        builder: (context)=>AlertDialog(title:Text('美女类型不能为空'))
+      );
+    }else{
+        getHttp(typeController.text.toString()).then((val){
+         setState(() {
+           showText=val['data']['name'].toString();
+         });
+        });
+    }
+
+  }
+```
+
+eg
+```
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final textEditingController = TextEditingController();
+
+  String showText = '您选择的是什么样美女..';
+
+  @override
+  void initState() {
+    super.initState();
+    textEditingController.addListener(() {
+      debugPrint('input 美女类型${textEditingController.text.toString()}');
+    });
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('美好人间'),
+        ),
+        body: Container(
+          child: Column(
+            children: <Widget>[
+              TextField(
+                controller: textEditingController,
+                decoration: InputDecoration(
+                  labelText: '美女类型',
+                  helperText: '请选择你要的类型',
+                ),
+                autofocus: false,
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              RaisedButton(
+                onPressed: () {
+                  _choiceActionGirl();
+                },
+                child: Text('点击你选择'),
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              // 显示你选择的
+              Text(
+                showText,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _choiceActionGirl() {
+    debugPrint('点击选择美女');
+    var typeText = textEditingController.text.toString();
+    if (typeText == '') {
+    } else {
+      getHttp(typeText).then((value) {
+        setState(() {
+          showText = value['data']['name'].toString();
+        });
+        debugPrint('选择美女是${value['data']['name'].toString()}');
+      });
+    }
+  }
+
+  // 请求返回数据
+  Future getHttp(String typeText) async {
+    try {
+      Response response;
+      // 参数
+      var param = {'name': typeText};
+      response = await Dio().get(
+        'https://www.easy-mock.com/mock/5c60131a4bed3a6342711498/baixing/dabaojian',
+        queryParameters: param,
+      );
+      return response.data;
+    } catch (e) {
+      return print(e);
+    }
+  }
+}
+
+```
+
+**总结:** 通过这节课的学习，我们应该掌握如下知识点
+
+1. 对Flutter动态组件的深入了解
+2. Future对象的使用
+3. 改变状态和界面的setState的方法应用
+4. TextField Widget的基本使用
