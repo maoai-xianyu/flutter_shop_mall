@@ -540,3 +540,95 @@ Future getHomePageContent() async {
 
 1. 和后端接口对接的一些实战技巧，这些技巧可以大大增加项目的灵活性和减少维护成本。
 2. 真实项目接口数据的获取，为我们的项目提供后端数据支持。
+
+# 第10节:使用FlutterSwiper制作轮播效果
+
+
+### 引入flutter_swiper插件
+
+> flutter最强大的siwiper, 多种布局方式，无限轮播，Android和IOS双端适配.
+
+[Flutter_swiper的GitHub地址](https://github.com/best-flutter/flutter_swiper)
+
+新写了一个SwiperDiy的类，当然这个类用静态类就完全可以了,这个类是需要接受一个List参数的
+
+```
+
+// 首页轮播组件编写
+class SwiperDiy extends StatelessWidget {
+  final List swiperDataList;
+  SwiperDiy({Key key,this.swiperDataList}):super(key:key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 333.0,
+      child: Swiper(
+        itemBuilder: (BuildContext context,int index){
+          return Image.network("${swiperDataList[index]['image']}",fit:BoxFit.fill);
+        },
+        itemCount: swiperDataList.length,
+        pagination: new SwiperPagination(),
+        autoplay: true,
+      ),
+    );
+  }
+}
+```
+
+### FutureBuilder Widget
+
+这是一个Flutter内置的组件，是用来等待异步请求的。同时拿掉initState() 的请求
+
+```
+import 'package:flutter/material.dart';
+import '../service/service_method.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
+import 'dart:convert'; // 导入json
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String homePageContent = '正在获取数据';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('百姓生活+'),
+      ),
+      body: FutureBuilder(
+        future: getHomePageContent(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // 有数据
+            // json反编译
+            var data = json.decode(snapshot.data.toString());
+            // 数据转换
+            List<Map> swiperList = (data['data']['slides'] as List).cast();
+            return Column(
+              children: <Widget>[
+                SwiperDiy(swiperList),
+              ],
+            );
+          } else {
+            // 没有数据
+            return Center(
+              child: Text('加载中....'),
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+```
+
+**课程总结：**
+
+1. flutter_Swiper:学习了flutter_swiper组件的简单使用方法，当然你还可以自己学习。
+2. FutureBuilder: 这个布局可以很好的解决异步渲染的问,实战中我们讲了很多使用的技巧，注意反复学习。
+3. 自定义类接受参数：我们复习了类接受参数的方法。学会了这个技巧就可以把我们的页面分成很多份，让很多人来进行编写，最后再整合到一起。
