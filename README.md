@@ -632,3 +632,30 @@ class _HomePageState extends State<HomePage> {
 1. flutter_Swiper:学习了flutter_swiper组件的简单使用方法，当然你还可以自己学习。
 2. FutureBuilder: 这个布局可以很好的解决异步渲染的问,实战中我们讲了很多使用的技巧，注意反复学习。
 3. 自定义类接受参数：我们复习了类接受参数的方法。学会了这个技巧就可以把我们的页面分成很多份，让很多人来进行编写，最后再整合到一起。
+
+
+# 第11节：首页_屏幕适配方案和制作
+
+移动端的屏幕大小不一，IOS端就有很多种，Android端更是多如牛毛。屏幕适配
+### flutter_ScreenUtil插件简介
+
+插件会让你先设置一个UI稿的尺寸，他会根据这个尺寸，根据不同屏幕进行缩放，能满足大部分屏幕场景。
+[flutter_ScreenUtil](https://github.com/OpenFlutter/flutter_screenutil)
+
+
+```
+pubspec.yaml
+
+dependencies:
+     flutter_screenutil: ^0.5.1
+
+Iphone6的，预先设置尺寸
+ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+
+```
+
+### 这时候我们使用的尺寸是px.
+
+1. 根据屏幕宽度适配：width:ScreenUtil().setWidth(540);
+2. 根据屏幕高度适配：height:ScreenUtil().setHeight(200);
+3. 适配字体大小：fontSize：ScreenUtil().setSp(28,false);

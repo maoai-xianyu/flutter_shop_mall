@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../service/service_method.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert'; // 导入json
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
 
 class HomePage extends StatefulWidget {
   @override
@@ -34,7 +35,9 @@ class _HomePageState extends State<HomePage> {
           } else {
             // 没有数据
             return Center(
-              child: Text('加载中....'),
+              child: Text(
+                '加载中....',
+              ),
             );
           }
         },
@@ -51,11 +54,23 @@ class SwiperDiy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 初始化  iphone6
+    ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+
+    print('设备的像素密度${ScreenUtil.pixelRatio}');
+    print('设备的高 px ${ScreenUtil.screenHeight}');
+    print('设备的宽 px ${ScreenUtil.screenWidth}');
+    print('设备的高 dp ${ScreenUtil.screenHeightDp}');
+    print('设备的宽 dp ${ScreenUtil.screenWidthDp}');
     return Container(
-      height: 333,
+      height: ScreenUtil().setHeight(333),
+      width: ScreenUtil().setWidth(750),
       child: Swiper(
         itemBuilder: (BuildContext context, int index) {
-          return Image.network("${swiperDataList[index]['image']}",fit: BoxFit.fill,);
+          return Image.network(
+            "${swiperDataList[index]['image']}",
+            fit: BoxFit.fill,
+          );
         },
         itemCount: swiperDataList.length,
         pagination: new SwiperPagination(),
