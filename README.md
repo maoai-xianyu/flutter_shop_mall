@@ -719,3 +719,27 @@ class TopNavigator extends StatelessWidget {
 
 
 ```
+
+
+# 第13节：ADBanner组件的编写
+
+
+```
+// 首页广告页面
+class AdBanner extends StatelessWidget {
+  final String adPicture;
+
+  AdBanner(this.adPicture);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Image.network(adPicture),
+    );
+  }
+}
+
+```
+
+
+### flutter upgrade 新版升级
