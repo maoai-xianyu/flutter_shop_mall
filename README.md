@@ -659,3 +659,63 @@ ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
 1. 根据屏幕宽度适配：width:ScreenUtil().setWidth(540);
 2. 根据屏幕高度适配：height:ScreenUtil().setHeight(200);
 3. 适配字体大小：fontSize：ScreenUtil().setSp(28,false);
+
+
+# 第12节:首页导航区域编写
+
+
+### 导航单元素的编写 和 GridView制作导航
+```
+
+class TopNavigator extends StatelessWidget {
+  final List navigatorList;
+
+  TopNavigator(this.navigatorList);
+
+  Widget _gridViewItemUI(BuildContext content, item) {
+    return InkWell(
+      onTap: () {
+        debugPrint('点击导航');
+      },
+      child: Column(
+        children: <Widget>[
+          Image.network(
+            item['image'],
+            width: ScreenUtil().setWidth(95),
+          ),
+          SizedBox(
+            height: ScreenUtil().setHeight(10),
+          ),
+          Text(
+            item['mallCategoryName'],
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(24),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 截取数据
+    if (this.navigatorList.length > 10) {
+      this.navigatorList.removeRange(10, this.navigatorList.length);
+    }
+    return Container(
+      height: ScreenUtil().setHeight(320),
+      padding: EdgeInsets.all(3.0),
+      child: GridView.count(
+        crossAxisCount: 5,
+        padding: EdgeInsets.all(4.0),
+        children: navigatorList.map((item) {
+          return _gridViewItemUI(context, item);
+        }).toList(),
+      ),
+    );
+  }
+}
+
+
+```

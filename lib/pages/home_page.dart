@@ -27,9 +27,12 @@ class _HomePageState extends State<HomePage> {
             var data = json.decode(snapshot.data.toString());
             // 数据转换
             List<Map> swiperList = (data['data']['slides'] as List).cast();
+            // 获取grid
+            List<Map> navigatorList = (data['data']['category'] as List).cast();
             return Column(
               children: <Widget>[
                 SwiperDiy(swiperList),
+                TopNavigator(navigatorList),
               ],
             );
           } else {
@@ -54,9 +57,6 @@ class SwiperDiy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 初始化  iphone6
-    ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
-
     print('设备的像素密度${ScreenUtil.pixelRatio}');
     print('设备的高 px ${ScreenUtil.screenHeight}');
     print('设备的宽 px ${ScreenUtil.screenWidth}');
@@ -75,6 +75,58 @@ class SwiperDiy extends StatelessWidget {
         itemCount: swiperDataList.length,
         pagination: new SwiperPagination(),
         autoplay: true,
+      ),
+    );
+  }
+}
+
+// 首页gridView显示种类
+class TopNavigator extends StatelessWidget {
+  final List navigatorList;
+
+  TopNavigator(this.navigatorList);
+
+  Widget _gridViewItemUI(BuildContext content, item) {
+    // 可以添加点击事件
+    return InkWell(
+      onTap: () {
+        debugPrint('点击导航');
+      },
+      child: Column(
+        children: <Widget>[
+          Image.network(
+            item['image'],
+            width: ScreenUtil().setWidth(95),
+          ),
+          SizedBox(
+            height: ScreenUtil().setHeight(10),
+          ),
+          Text(
+            item['mallCategoryName'],
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(24),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 截取数据
+    if (this.navigatorList.length > 10) {
+      this.navigatorList.removeRange(10, this.navigatorList.length);
+    }
+    return Container(
+      height: ScreenUtil().setHeight(320),
+      padding: EdgeInsets.all(3.0),
+      child: GridView.count(
+        crossAxisCount: 5,
+        padding: EdgeInsets.all(4.0),
+        children: navigatorList.map((item) {
+          return _gridViewItemUI(context, item);
+        }).toList(),
       ),
     );
   }
