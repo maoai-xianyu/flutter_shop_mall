@@ -3,6 +3,7 @@ import '../service/service_method.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert'; // 导入json
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -32,11 +33,15 @@ class _HomePageState extends State<HomePage> {
             // 获取广告
             String adPicture =
                 data['data']['advertesPicture']['PICTURE_ADDRESS'];
+            // 获取店长信息
+            String leaderImage = data['data']['shopInfo']['leaderImage'];
+            String leaderPhone = data['data']['shopInfo']['leaderPhone'];
             return Column(
               children: <Widget>[
                 SwiperDiy(swiperList),
                 TopNavigator(navigatorList),
                 AdBanner(adPicture),
+                LeaderPhone(leaderImage, leaderPhone),
               ],
             );
           } else {
@@ -147,5 +152,34 @@ class AdBanner extends StatelessWidget {
     return Container(
       child: Image.network(adPicture),
     );
+  }
+}
+
+// 首页获取店长电话
+class LeaderPhone extends StatelessWidget {
+  final String leaderImage;
+  final String leaderPhone;
+
+  LeaderPhone(this.leaderImage, this.leaderPhone);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: InkWell(
+        onTap: _launchURL,
+        child: Image.network(leaderImage),
+      ),
+    );
+  }
+
+  void _launchURL() async {
+    String url = 'tel:' + leaderPhone; // 打开电话
+    //String url = 'https://flutter.io'; // 打开网页
+    print('url $url');
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'url不能进行访问，异常 $url';
+    }
   }
 }

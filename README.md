@@ -743,3 +743,63 @@ class AdBanner extends StatelessWidget {
 
 
 ### flutter upgrade 新版升级
+
+
+# 第14节：首页_拨打电话操作
+
+
+### url_launcher的简介
+
+[url_launcher](https://github.com/flutter/plugins/tree/master/packages/url_launcher)
+
+```
+url_launcher: ^5.0.2
+
+
+import 'package:url_launcher/url_launcher.dart';
+
+void _launchURL() async {
+    String url = 'tel:' + leaderPhone; // 打开电话
+    //String url = 'https://flutter.io'; // 打开网页
+    print('url $url');
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'url不能进行访问，异常 $url';
+    }
+  }
+```
+
+
+
+```
+// 首页获取店长电话
+class LeaderPhone extends StatelessWidget {
+  final String leaderImage;
+  final String leaderPhone;
+
+  LeaderPhone(this.leaderImage, this.leaderPhone);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: InkWell(
+        onTap: _launchURL,
+        child: Image.network(leaderImage),
+      ),
+    );
+  }
+
+  void _launchURL() async {
+    String url = 'tel:' + leaderPhone; // 打开电话
+    //String url = 'https://flutter.io'; // 打开网页
+    print('url $url');
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'url不能进行访问，异常 $url';
+    }
+  }
+}
+
+```
