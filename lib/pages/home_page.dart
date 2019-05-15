@@ -270,7 +270,7 @@ class Recommend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ScreenUtil().setHeight(330),
+      height: ScreenUtil().setHeight(380),
       margin: EdgeInsets.only(top: 10),
       child: Column(
         children: <Widget>[
