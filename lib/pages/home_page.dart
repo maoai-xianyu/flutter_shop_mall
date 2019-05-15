@@ -10,8 +10,20 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+// 保持页面状态
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
+
   String homePageContent = '正在获取数据';
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('初始化页面');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +44,13 @@ class _HomePageState extends State<HomePage> {
             List<Map> navigatorList = (data['data']['category'] as List).cast();
             // 获取广告
             String adPicture =
-                data['data']['advertesPicture']['PICTURE_ADDRESS'];
+            data['data']['advertesPicture']['PICTURE_ADDRESS'];
             // 获取店长信息
             String leaderImage = data['data']['shopInfo']['leaderImage'];
             String leaderPhone = data['data']['shopInfo']['leaderPhone'];
             // 获取商品项目
-            List<Map> recommendList = (data['data']['recommend'] as List).cast();
+            List<Map> recommendList = (data['data']['recommend'] as List)
+                .cast();
 
             return SingleChildScrollView(
               child: Column(
@@ -62,6 +75,8 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+
 }
 
 // 首页轮播组件

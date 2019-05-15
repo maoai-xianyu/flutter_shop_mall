@@ -31,7 +31,7 @@ class _IndexPageState extends State<IndexPage> {
     ),
   ];
 
-  final List tabBodies = [
+  final List<Widget> tabBodies = [
     HomePage(),
     CategoryPage(),
     CartPage(),
@@ -54,7 +54,11 @@ class _IndexPageState extends State<IndexPage> {
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(244, 245, 245, 1.0),
-      body: _currentPage,
+      // 保持页面状态
+      body: IndexedStack(
+        children: tabBodies,
+        index: _currentIndex,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: bottomBars,

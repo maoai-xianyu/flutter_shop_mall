@@ -916,3 +916,57 @@ InkWell 组件用于点击事件
 
 1. 这节主要制作了商品推荐区域的制作，知识点可能都是我们以前学过的，但是要重点练习一下如何练习对组件的拆分能力。
 2. 当你掌握了这种能力后，你会发现Flutter真的很好用，我们只需要Dart这一种语言，就可以编写页面和前台的业务逻辑
+
+
+# 第16节：补充_切换后页面状态的保持
+
+###  AutomaticKeepAliveClientMixin
+
+AutomaticKeepAliveClientMixin这个Mixin就是Flutter为了保持页面设置的。哪个页面需要保持页面状态，就在这个页面进行混入。
+
+> 不过使用使用这个Mixin是有几个先决条件的：
+
+1. 使用的页面必须是StatefulWidget,如果是StatelessWidget是没办法办法使用的。
+2. 其实只有两个前置组件才能保持页面状态：PageView和IndexedStack。
+3. 重写wantKeepAlive方法，如果不重写也是实现不了的。
+
+### 修改index_page.dart
+
+IndexedStack包裹在tabBodies外边
+
+```
+index_page.dart
+
+final List<Widget> tabBodies = [
+    HomePage(),
+    CategoryPage(),
+    CartPage(),
+    MemberPage(),
+  ];
+  
+ // 保持页面状态
+body: IndexedStack(
+        children: tabBodies,
+        index: _currentIndex,
+      ),  
+```
+
+###  加入Mixin保持页面状态
+
+```
+
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {'
+    
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('初始化页面');
+  }
+  
+  
+}
+```
