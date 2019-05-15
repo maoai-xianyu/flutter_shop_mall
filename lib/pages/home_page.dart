@@ -36,13 +36,19 @@ class _HomePageState extends State<HomePage> {
             // 获取店长信息
             String leaderImage = data['data']['shopInfo']['leaderImage'];
             String leaderPhone = data['data']['shopInfo']['leaderPhone'];
-            return Column(
-              children: <Widget>[
-                SwiperDiy(swiperList),
-                TopNavigator(navigatorList),
-                AdBanner(adPicture),
-                LeaderPhone(leaderImage, leaderPhone),
-              ],
+            // 获取商品项目
+            List<Map> recommendList = (data['data']['recommend'] as List).cast();
+
+            return SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  SwiperDiy(swiperList),
+                  TopNavigator(navigatorList),
+                  AdBanner(adPicture),
+                  LeaderPhone(leaderImage, leaderPhone),
+                  Recommend(recommendList),
+                ],
+              ),
             );
           } else {
             // 没有数据
@@ -181,5 +187,98 @@ class LeaderPhone extends StatelessWidget {
     } else {
       throw 'url不能进行访问，异常 $url';
     }
+  }
+}
+
+// 商品推荐
+class Recommend extends StatelessWidget {
+  final List recommendList;
+
+  Recommend(this.recommendList);
+
+  // 标题
+  Widget _recommedTitle() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.fromLTRB(10, 2, 0, 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            width: 0.5,
+            color: Colors.black12,
+          ),
+        ),
+      ),
+      child: Text(
+        '商品推荐',
+        style: TextStyle(
+          color: Colors.pink,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+
+  // 商品单独项
+  Widget _goodsItem(index) {
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        height: ScreenUtil().setHeight(330),
+        width: ScreenUtil().setWidth(250),
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            left: BorderSide(
+              width: 0.5,
+              color: Colors.black12,
+            ),
+          ),
+        ),
+        child: Column(
+          children: <Widget>[
+            Image.network(recommendList[index]['image']),
+            Text('￥${recommendList[index]['mallPrice']}'),
+            Text(
+              '￥${recommendList[index]['price']}',
+              style: TextStyle(
+                decoration: TextDecoration.lineThrough,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 横向列表
+  Widget _recommendList() {
+    return Container(
+      height: ScreenUtil().setHeight(330),
+      margin: EdgeInsets.only(top: 10),
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: recommendList.length,
+          itemBuilder: (context, index) {
+            return _goodsItem(index);
+          }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: ScreenUtil().setHeight(330),
+      margin: EdgeInsets.only(top: 10),
+      child: Column(
+        children: <Widget>[
+          _recommedTitle(),
+          _recommendList(),
+        ],
+      ),
+    );
   }
 }

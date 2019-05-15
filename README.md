@@ -803,3 +803,116 @@ class LeaderPhone extends StatelessWidget {
 }
 
 ```
+
+
+# 第15节：商品推荐区域制作
+
+### 超出边界的处理方法
+
+SingleChildScrollView
+
+```
+SingleChildScrollView(
+   child: Column(
+        children: <Widget>[
+             SwiperDiy(swiperList),
+             TopNavigator(navigatorList),
+             AdBanner(adPicture),
+             LeaderPhone(leaderImage, leaderPhone),
+             Recommend(recommendList),
+        ],
+   ),
+);
+```
+### 推荐标题内部方法的编写
+
+```
+// 标题
+  Widget _recommedTitle() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.fromLTRB(10, 2, 0, 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            width: 0.5,
+            color: Colors.black12,
+          ),
+        ),
+      ),
+      child: Text(
+        '商品推荐',
+        style: TextStyle(
+          color: Colors.pink,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+```
+
+
+### 推荐商品单独项编写
+
+InkWell 组件用于点击事件
+
+```
+// 商品单独项
+  Widget _goodsItem(index) {
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        height: ScreenUtil().setHeight(330),
+        width: ScreenUtil().setWidth(250),
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            left: BorderSide(
+              width: 0.5,
+              color: Colors.black12,
+            ),
+          ),
+        ),
+        child: Column(
+          children: <Widget>[
+            Image.network(recommendList[index]['image']),
+            Text('￥${recommendList[index]['mallPrice']}'),
+            Text(
+              '￥${recommendList[index]['price']}',
+              style: TextStyle(
+                decoration: TextDecoration.lineThrough,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+```
+
+### 横向列表组件的编写
+
+```
+ // 横向列表
+  Widget _recommendList() {
+    return Container(
+      height: ScreenUtil().setHeight(330),
+      margin: EdgeInsets.only(top: 10),
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: recommendList.length,
+          itemBuilder: (context, index) {
+            return _goodsItem(index);
+          }),
+    );
+  }
+```
+
+**本节总结**
+
+1. 这节主要制作了商品推荐区域的制作，知识点可能都是我们以前学过的，但是要重点练习一下如何练习对组件的拆分能力。
+2. 当你掌握了这种能力后，你会发现Flutter真的很好用，我们只需要Dart这一种语言，就可以编写页面和前台的业务逻辑
