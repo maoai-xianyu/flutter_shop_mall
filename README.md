@@ -970,3 +970,85 @@ class _HomePageState extends State<HomePage>
   
 }
 ```
+
+# 第17节：首页_楼层区域的编写
+
+* 楼层标题
+
+```
+
+// 楼层标题
+class FloorTitle extends StatelessWidget {
+  final String pictureAddress;
+
+  FloorTitle(this.pictureAddress);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Image.network(pictureAddress),
+    );
+  }
+}
+
+```
+
+* 楼层商品
+```
+
+// 楼层商品
+class FloorContent extends StatelessWidget {
+  final List floorGoodsList;
+
+  FloorContent(this.floorGoodsList);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          _firstRow(),
+          _otherGoods(),
+        ],
+      ),
+    );
+  }
+
+  Widget _otherGoods() {
+    return Row(
+      children: <Widget>[
+        _goodsItems(floorGoodsList[3]),
+        _goodsItems(floorGoodsList[4]),
+      ],
+    );
+  }
+
+  Widget _firstRow() {
+    return Row(
+      children: <Widget>[
+        _goodsItems(floorGoodsList[0]),
+        Column(
+          children: <Widget>[
+            _goodsItems(floorGoodsList[1]),
+            _goodsItems(floorGoodsList[2]),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _goodsItems(Map goods) {
+    return Container(
+      width: ScreenUtil().setWidth(375),
+      child: InkWell(
+        onTap: () {
+          debugPrint("点击");
+        },
+        child: Image.network(goods['image']),
+      ),
+    );
+  }
+}
+
+```
