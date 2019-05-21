@@ -1052,3 +1052,73 @@ class FloorContent extends StatelessWidget {
 }
 
 ```
+
+## 第18节：火爆专区接口整理
+
+```
+service_url.dart  定义接口
+
+const serviceUrl = 'http://v.jspang.com:8088/baixing/';
+const servicePath = {
+  'homePageContent':serviceUrl + 'wxmini/homePageContent', // 商店首页信息
+  'homePageBelowConten':serviceUrl + 'wxmini/homePageBelowConten', // 首页热卖商品
+  'getCategory':serviceUrl + 'wxmini/getCategory',  // 商品类别信息
+  'getMallGoods':serviceUrl + 'wxmini/getMallGoods',  // 商品分类页面商品列表
+  'getGoodDetailById':serviceUrl + 'wxmini/getGoodDetailById',  // 商品详情
+};
+
+```
+
+```
+service_method.dart
+
+import 'package:dio/dio.dart';
+import 'dart:async';
+import 'dart:io';
+import '../config/service_url.dart';
+
+// 获取首页主体内容
+Future getHomePageContent() {
+  print('开始获取首页数据....');
+  var formData = {
+    'lon': '115.02932',
+    'lat': '35.76189',
+  };
+  return request('homePageContent', formData);
+}
+
+// 获取火爆专区的商品
+Future getHomePageHotContent(page) {
+  print('开始火爆专区的数据....');
+  return request('homePageBelowConten', page);
+}
+
+
+// 方法
+Future request(url, formData) async {
+  try {
+    print('开始获取数据....');
+    Response response;
+    Dio dio = new Dio();
+    // 表单
+    dio.options.contentType = ContentType.parse(
+      "application/x-www-form-urlencoded",
+    );
+    if (formData == null) {
+      response = await dio.post(servicePath[url]);
+    } else {
+      response = await dio.post(servicePath[url], data: formData);
+    }
+    if (response.statusCode == 200) {
+      print('数据返回 ${response.data}');
+      return response.data;
+    } else {
+      throw Exception('后端接口出现异常。');
+    }
+  } catch (e) {
+    return print('Error: =======>$e');
+  }
+}
+
+
+```

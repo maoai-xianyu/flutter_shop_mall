@@ -52,13 +52,16 @@ class _HomePageState extends State<HomePage>
                 (data['data']['recommend'] as List).cast();
 
             // 获取楼层
-            String picture1Address = data['data']['floor1Pic']['PICTURE_ADDRESS'];
-            String picture2Address = data['data']['floor2Pic']['PICTURE_ADDRESS'];
-            String picture3Address = data['data']['floor3Pic']['PICTURE_ADDRESS'];
+            String picture1Address =
+                data['data']['floor1Pic']['PICTURE_ADDRESS'];
+            String picture2Address =
+                data['data']['floor2Pic']['PICTURE_ADDRESS'];
+            String picture3Address =
+                data['data']['floor3Pic']['PICTURE_ADDRESS'];
             // 获取楼层商品
-            List<Map> floor1GoodsList =( data['data']['floor1'] as List).cast();
-            List<Map> floor2GoodsList =( data['data']['floor2'] as List).cast();
-            List<Map> floor3GoodsList =( data['data']['floor3'] as List).cast();
+            List<Map> floor1GoodsList = (data['data']['floor1'] as List).cast();
+            List<Map> floor2GoodsList = (data['data']['floor2'] as List).cast();
+            List<Map> floor3GoodsList = (data['data']['floor3'] as List).cast();
 
             return SingleChildScrollView(
               child: Column(
@@ -74,6 +77,7 @@ class _HomePageState extends State<HomePage>
                   FloorContent(floor2GoodsList),
                   FloorTitle(picture3Address),
                   FloorContent(floor3GoodsList),
+                  HotGoods(),
                 ],
               ),
             );
@@ -375,6 +379,29 @@ class FloorContent extends StatelessWidget {
         },
         child: Image.network(goods['image']),
       ),
+    );
+  }
+}
+
+// 火爆商品
+class HotGoods extends StatefulWidget {
+  @override
+  _HotGoodsState createState() => _HotGoodsState();
+}
+
+class _HotGoodsState extends State<HotGoods> {
+  @override
+  void initState() {
+    super.initState();
+    getHomePageHotContent(1).then((value) {
+      debugPrint(value);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Text("codingtk"),
     );
   }
 }
