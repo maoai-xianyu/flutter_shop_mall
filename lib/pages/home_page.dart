@@ -15,6 +15,9 @@ class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin {
   String homePageContent = '正在获取数据';
 
+  int page = 1;
+  List<Map> _hotGoods = [];
+
   @override
   bool get wantKeepAlive => true;
 
@@ -22,6 +25,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     debugPrint('初始化页面');
+    _getHotGoods();
   }
 
   @override
@@ -77,7 +81,7 @@ class _HomePageState extends State<HomePage>
                   FloorContent(floor2GoodsList),
                   FloorTitle(picture3Address),
                   FloorContent(floor3GoodsList),
-                  HotGoods(),
+                  _HotGoods(),
                 ],
               ),
             );
@@ -92,6 +96,120 @@ class _HomePageState extends State<HomePage>
         },
       ),
     );
+  }
+
+  Widget _HotGoods() {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          _hotGoodTitle(),
+          _hotGoodsShow(),
+        ],
+      ),
+    );
+  }
+
+  // 火爆专区
+  Widget _hotGoodTitle() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      alignment: Alignment.center,
+      color: Colors.grey[100],
+      child: Container(
+        width: ScreenUtil().setWidth(150),
+        child: Row(
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(right: 5),
+              child: Image.asset(
+                'images/hot_fire.png',
+                fit: BoxFit.cover,
+                width: ScreenUtil().setWidth(30),
+                height: ScreenUtil().setWidth(30),
+              ),
+            ),
+            Text(
+              '火爆专区',
+              style: TextStyle(
+                fontSize: ScreenUtil().setSp(20),
+                color: Colors.black,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 获取火爆专区数据
+  void _getHotGoods() {
+    getHomePageHotContent(page).then((value) {
+      debugPrint(value);
+      var data = json.decode(value.toString());
+      List<Map> newGoodList = (data['data'] as List).cast();
+      this.setState(() {
+        _hotGoods.addAll(newGoodList);
+        page++;
+      });
+    });
+  }
+
+  // 火爆专区商品
+  Widget _hotGoodsShow() {
+    if (_hotGoods.length != 0) {
+      List<Widget> _hotGoodsList = _hotGoods.map((value) {
+        return InkWell(
+          onTap: () {
+            debugPrint('点击火爆商品');
+          },
+          child: Container(
+            width: ScreenUtil().setWidth(372),
+            padding: EdgeInsets.all(5),
+            color: Colors.white,
+            margin: EdgeInsets.only(bottom: 3),
+            child: Column(
+              children: <Widget>[
+                Image.network(
+                  value['image'],
+                  width: ScreenUtil().setWidth(375),
+                ),
+                Text(
+                  value['name'],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(26),
+                    color: Colors.pink,
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Text('￥${value['mallPrice']}'),
+                    Container(
+                      margin: EdgeInsets.only(left: 50),
+                      child: Text(
+                        '￥${value['price']}',
+                        style: TextStyle(
+                          color: Colors.black26,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      }).toList();
+
+      return Wrap(
+        spacing: 2,
+        children: _hotGoodsList,
+      );
+    } else {
+      return Text('');
+    }
   }
 }
 
@@ -379,29 +497,6 @@ class FloorContent extends StatelessWidget {
         },
         child: Image.network(goods['image']),
       ),
-    );
-  }
-}
-
-// 火爆商品
-class HotGoods extends StatefulWidget {
-  @override
-  _HotGoodsState createState() => _HotGoodsState();
-}
-
-class _HotGoodsState extends State<HotGoods> {
-  @override
-  void initState() {
-    super.initState();
-    getHomePageHotContent(1).then((value) {
-      debugPrint(value);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text("codingtk"),
     );
   }
 }

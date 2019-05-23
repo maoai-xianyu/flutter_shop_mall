@@ -10,18 +10,21 @@ Future getHomePageContent() {
     'lon': '115.02932',
     'lat': '35.76189',
   };
-  return request('homePageContent', formData);
+  return request('homePageContent',formData:formData);
 }
 
 // 获取火爆专区的商品
 Future getHomePageHotContent(page) {
   print('开始火爆专区的数据....');
-  return request('homePageBelowConten', page);
+  var formData= {
+    'page':page,
+  };
+  return request('homePageBelowConten', formData:formData);
 }
 
 
 // 方法
-Future request(url, formData) async {
+Future request(url, {formData}) async {
   try {
     print('开始获取数据....');
     Response response;
