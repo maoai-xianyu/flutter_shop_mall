@@ -1125,7 +1125,7 @@ Future request(url, formData) async {
 
 ## 第19节：火爆专区界面布局
 
-* Dart中可选参数的设置
+### Dart中可选参数的设置
 
 我们的参数使用了一个必选参数，其实我们可以使用一个可选参数。Dart中的可选参数，直接使用“{}”(大括号)就可以了。
 可选参数在调用的时候必须使用paramName:value的形式。
@@ -1186,7 +1186,7 @@ Future request(url, {formData}) async {
 
 ```
 
-* 火爆专区标题编写
+### 火爆专区标题编写
 
 火爆专区，我们先采用State的原始方法，来进行制作，因为这也是很多小伙伴要求的，所以我们主要讲解一下StatefulWidget的使用。
 下次我们写分类页面的时候会用Redux的方法，以为StatefulWidget的方法会让程序耦合性很强，不利于以后程序的维护。
@@ -1410,5 +1410,245 @@ class _HomePageState extends State<HomePage>
     }
   }
 }
+
+```
+
+## 第20节：火爆专区界面上拉加载
+
+### flutter_easyrefresh简介
+
+EasyRefresh中集成了多种风格的Header和Footer，但是它并没有局限性，你可以很轻松的自定义。使用Flutter强大的动画，甚至随便一个简单的控件也可以完成。EasyRefresh的目标是为Flutter打造一个强大，稳定，成熟的下拉刷新框架。
+
+[flutter_easyrefresh](https://github.com/xuelongqy/flutter_easyrefresh)
+
+如下: 使用 flutter_easyrefresh
+
+```
+dependencies:
+  flutter_easyrefresh: ^1.2.7
+
+
+import 'package:flutter_easyrefresh/easy_refresh.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+// 保持页面状态
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
+  String homePageContent = '正在获取数据';
+
+  int page = 1;
+  List<Map> _hotGoods = [];
+  GlobalKey<RefreshFooterState> _footerKey =
+      new GlobalKey<RefreshFooterState>();
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('初始化页面');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('百姓生活+'),
+      ),
+      body: FutureBuilder(
+        future: getHomePageContent(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // 有数据
+            // json反编译
+            var data = json.decode(snapshot.data.toString());
+            // 数据转换
+            List<Map> swiperList = (data['data']['slides'] as List).cast();
+            // 获取grid
+            List<Map> navigatorList = (data['data']['category'] as List).cast();
+            // 获取广告
+            String adPicture =
+                data['data']['advertesPicture']['PICTURE_ADDRESS'];
+            // 获取店长信息
+            String leaderImage = data['data']['shopInfo']['leaderImage'];
+            String leaderPhone = data['data']['shopInfo']['leaderPhone'];
+            // 获取商品项目
+            List<Map> recommendList =
+                (data['data']['recommend'] as List).cast();
+
+            // 获取楼层
+            String picture1Address =
+                data['data']['floor1Pic']['PICTURE_ADDRESS'];
+            String picture2Address =
+                data['data']['floor2Pic']['PICTURE_ADDRESS'];
+            String picture3Address =
+                data['data']['floor3Pic']['PICTURE_ADDRESS'];
+            // 获取楼层商品
+            List<Map> floor1GoodsList = (data['data']['floor1'] as List).cast();
+            List<Map> floor2GoodsList = (data['data']['floor2'] as List).cast();
+            List<Map> floor3GoodsList = (data['data']['floor3'] as List).cast();
+
+            return EasyRefresh(
+              child: ListView(
+                children: <Widget>[
+                  SwiperDiy(swiperList),
+                  TopNavigator(navigatorList),
+                  AdBanner(adPicture),
+                  LeaderPhone(leaderImage, leaderPhone),
+                  Recommend(recommendList),
+                  FloorTitle(picture1Address),
+                  FloorContent(floor1GoodsList),
+                  FloorTitle(picture2Address),
+                  FloorContent(floor2GoodsList),
+                  FloorTitle(picture3Address),
+                  FloorContent(floor3GoodsList),
+                  _HotGoods(),
+                ],
+              ),
+              // 上拉加载，footer设置
+              refreshFooter: ClassicsFooter(
+                key: _footerKey,
+                bgColor: Colors.white,
+                textColor: Colors.pink,
+                moreInfoColor: Colors.pink,
+                showMore: true,
+                noMoreText: '',
+                moreInfo: '加载中...',
+                loadReadyText: '上拉加载...',
+              ),
+              // 上拉加载
+              loadMore: () async {
+                debugPrint('获取火爆专区的数据，开始加载更多....');
+                await getHomePageHotContent(page).then((value) {
+                  debugPrint(value);
+                  var data = json.decode(value.toString());
+                  List<Map> newGoodList = (data['data'] as List).cast();
+                  this.setState(() {
+                    _hotGoods.addAll(newGoodList);
+                    page++;
+                  });
+                });
+              },
+            );
+          } else {
+            // 没有数据
+            return Center(
+              child: Text(
+                '加载中....',
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _HotGoods() {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          _hotGoodTitle(),
+          _hotGoodsShow(),
+        ],
+      ),
+    );
+  }
+
+  // 火爆专区
+  Widget _hotGoodTitle() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      alignment: Alignment.center,
+      color: Colors.grey[100],
+      child: Container(
+        width: ScreenUtil().setWidth(150),
+        child: Row(
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(right: 5),
+              child: Image.asset(
+                'images/hot_fire.png',
+                fit: BoxFit.cover,
+                width: ScreenUtil().setWidth(30),
+                height: ScreenUtil().setWidth(30),
+              ),
+            ),
+            Text(
+              '火爆专区',
+              style: TextStyle(
+                fontSize: ScreenUtil().setSp(20),
+                color: Colors.black,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 火爆专区商品
+  Widget _hotGoodsShow() {
+    if (_hotGoods.length != 0) {
+      List<Widget> _hotGoodsList = _hotGoods.map((value) {
+        return InkWell(
+          onTap: () {
+            debugPrint('点击火爆商品');
+          },
+          child: Container(
+            width: ScreenUtil().setWidth(372),
+            padding: EdgeInsets.all(5),
+            color: Colors.white,
+            margin: EdgeInsets.only(bottom: 3),
+            child: Column(
+              children: <Widget>[
+                Image.network(
+                  value['image'],
+                  width: ScreenUtil().setWidth(370),
+                ),
+                Text(
+                  value['name'],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(26),
+                    color: Colors.pink,
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Text('￥${value['mallPrice']}'),
+                    Container(
+                      margin: EdgeInsets.only(left: 50),
+                      child: Text(
+                        '￥${value['price']}',
+                        style: TextStyle(
+                          color: Colors.black26,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      }).toList();
+
+      return Wrap(
+        spacing: 2,
+        children: _hotGoodsList,
+      );
+    } else {
+      return Text('');
+    }
+  }
+}
+
 
 ```
