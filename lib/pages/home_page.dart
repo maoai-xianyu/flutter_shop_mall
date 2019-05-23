@@ -5,6 +5,8 @@ import 'dart:convert'; // 导入json
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:flutter_easyrefresh/material_footer.dart';
+import 'package:flutter_easyrefresh/material_header.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -18,6 +20,7 @@ class _HomePageState extends State<HomePage>
 
   int page = 1;
   List<Map> _hotGoods = [];
+  GlobalKey<RefreshHeaderState> _headerKey = new GlobalKey<RefreshHeaderState>();
   GlobalKey<RefreshFooterState> _footerKey =
       new GlobalKey<RefreshFooterState>();
 
@@ -86,6 +89,16 @@ class _HomePageState extends State<HomePage>
                   _HotGoods(),
                 ],
               ),
+              refreshHeader: MaterialHeader(
+                key: _headerKey,
+                backgroundColor: Colors.white,
+              ),
+              onRefresh: () async {
+                this.setState((){
+                  _hotGoods.clear();
+                  page = 1;
+                });
+              },
               // 上拉加载，footer设置
               refreshFooter: ClassicsFooter(
                 key: _footerKey,
