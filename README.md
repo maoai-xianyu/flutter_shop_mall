@@ -1652,3 +1652,83 @@ class _HomePageState extends State<HomePage>
 
 
 ```
+
+## 第21节：分类页面 类别信息接口调试
+
+### # 禁止滑动的设置 
+
+首页导航区域采用了GridView，这个和我们的ListView上拉加载是冲突的，我们的组件没有智能到为我们辨认，所以我们可以直接禁用GridView的滚动。
+
+```
+// 首页gridView显示种类
+class TopNavigator extends StatelessWidget {
+  final List navigatorList;
+
+  TopNavigator(this.navigatorList);
+
+  Widget _gridViewItemUI(BuildContext content, item) {
+    // 可以添加点击事件
+    return InkWell(
+      onTap: () {
+        debugPrint('点击导航');
+      },
+      child: Column(
+        children: <Widget>[
+          Image.network(
+            item['image'],
+            width: ScreenUtil().setWidth(95),
+          ),
+          SizedBox(
+            height: ScreenUtil().setHeight(10),
+          ),
+          Text(
+            item['mallCategoryName'],
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(24),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 截取数据
+    if (this.navigatorList.length > 10) {
+      this.navigatorList.removeRange(10, this.navigatorList.length);
+    }
+    return Container(
+      height: ScreenUtil().setHeight(320),
+      padding: EdgeInsets.all(3.0),
+      child: GridView.count(
+        // 禁止回弹
+        physics: NeverScrollableScrollPhysics(),
+        crossAxisCount: 5,
+        padding: EdgeInsets.all(4.0),
+        children: navigatorList.map((item) {
+          return _gridViewItemUI(context, item);
+        }).toList(),
+      ),
+    );
+  }
+}
+```
+
+### 分类接口文件编写
+
+```
+
+void _getCategory() async {
+    await getCategoryContent().then((value) {
+      debugPrint(value);
+      var data = json.decode(value.toString());
+    });
+  }
+  
+  // 获取分类页面的数据
+  Future getCategoryContent() {
+    print('开始获取分类页面数据....');
+    return request('getCategory');
+  }
+```

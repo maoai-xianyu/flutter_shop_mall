@@ -10,18 +10,23 @@ Future getHomePageContent() {
     'lon': '115.02932',
     'lat': '35.76189',
   };
-  return request('homePageContent',formData:formData);
+  return request('homePageContent', formData: formData);
 }
 
 // 获取火爆专区的商品
 Future getHomePageHotContent(page) {
   print('开始火爆专区的数据....');
-  var formData= {
-    'page':page,
+  var formData = {
+    'page': page,
   };
-  return request('homePageBelowConten', formData:formData);
+  return request('homePageBelowConten', formData: formData);
 }
 
+// 获取分类页面的数据
+Future getCategoryContent() {
+  print('开始获取分类页面数据....');
+  return request('getCategory');
+}
 
 // 方法
 Future request(url, {formData}) async {
@@ -33,6 +38,7 @@ Future request(url, {formData}) async {
     dio.options.contentType = ContentType.parse(
       "application/x-www-form-urlencoded",
     );
+    print('url ${servicePath[url]}');
     if (formData == null) {
       response = await dio.post(servicePath[url]);
     } else {

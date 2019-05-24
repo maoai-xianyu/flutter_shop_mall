@@ -20,7 +20,8 @@ class _HomePageState extends State<HomePage>
 
   int page = 1;
   List<Map> _hotGoods = [];
-  GlobalKey<RefreshHeaderState> _headerKey = new GlobalKey<RefreshHeaderState>();
+  GlobalKey<RefreshHeaderState> _headerKey =
+      new GlobalKey<RefreshHeaderState>();
   GlobalKey<RefreshFooterState> _footerKey =
       new GlobalKey<RefreshFooterState>();
 
@@ -94,7 +95,7 @@ class _HomePageState extends State<HomePage>
                 backgroundColor: Colors.white,
               ),
               onRefresh: () async {
-                this.setState((){
+                this.setState(() {
                   _hotGoods.clear();
                   page = 1;
                 });
@@ -107,8 +108,11 @@ class _HomePageState extends State<HomePage>
                 moreInfoColor: Colors.pink,
                 showMore: true,
                 noMoreText: '',
-                moreInfo: '加载中...',
-                loadReadyText: '上拉加载...',
+                moreInfo: '加载...',
+                loadReadyText: '上拉加载开始...',
+                loadingText: '加载中',
+                loadedText: '加载完成...',
+                loadText: '上拉加载...',
               ),
               // 上拉加载
               loadMore: () async {
@@ -312,6 +316,8 @@ class TopNavigator extends StatelessWidget {
       height: ScreenUtil().setHeight(320),
       padding: EdgeInsets.all(3.0),
       child: GridView.count(
+        // 禁止回弹
+        physics: NeverScrollableScrollPhysics(),
         crossAxisCount: 5,
         padding: EdgeInsets.all(4.0),
         children: navigatorList.map((item) {
