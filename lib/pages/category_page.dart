@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_shop_mall/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
+import '../model/CategoryListModel.dart';
 
 class CategoryPage extends StatefulWidget {
   @override
@@ -23,6 +24,9 @@ class _CategoryPageState extends State<CategoryPage> {
     await getCategoryContent().then((value) {
       debugPrint(value);
       var data = json.decode(value.toString());
+      var categoryListModel = CategoryListModel.fromJson(data['data']);
+      categoryListModel.categoryListModel
+          .forEach((item) => {debugPrint(item.mallCategoryName)});
     });
   }
 }

@@ -484,6 +484,21 @@ const httpHeadersJK= {
 
 # 第09节：移动商城数据请求实战（好戏开始）
 
+> [首页获取数据Post http://v.jspang.com:8088/baixing/wxmini/homePageContent](http://v.jspang.com:8088/baixing/wxmini/homePageContent)
+
+```
+参数 
+
+dio.options.contentType = ContentType.parse(
+      "application/x-www-form-urlencoded",
+    );
+    var formData = {
+      'lon': '115.02932',
+      'lat': '35.76189',
+    };
+    
+```
+
 ### 建立网络请求
 
 
@@ -1054,6 +1069,8 @@ class FloorContent extends StatelessWidget {
 ```
 
 ## 第18节：火爆专区接口整理
+
+> [获取首页火爆商品Post http://v.jspang.com:8088/baixing/wxmini/homePageBelowConten](http://v.jspang.com:8088/baixing/wxmini/homePageBelowConten)
 
 ```
 service_url.dart  定义接口
@@ -1655,7 +1672,9 @@ class _HomePageState extends State<HomePage>
 
 ## 第21节：分类页面 类别信息接口调试
 
-### # 禁止滑动的设置 
+> [获取分类Post http://v.jspang.com:8088/baixing/wxmini/getCategory]
+
+### 禁止滑动的设置 
 
 首页导航区域采用了GridView，这个和我们的ListView上拉加载是冲突的，我们的组件没有智能到为我们辨认，所以我们可以直接禁用GridView的滚动。
 
@@ -1732,3 +1751,95 @@ void _getCategory() async {
     return request('getCategory');
   }
 ```
+
+
+## 第22节：Json解析和复杂数据模型转换
+
+### model 类
+
+
+>  [获取分类Post http://v.jspang.com:8088/baixing/wxmini/getCategory](http://v.jspang.com:8088/baixing/wxmini/getCategory)
+
+```
+CategoryModel.dart
+
+class CategoryModel {
+  String mallCategoryId;
+  String mallCategoryName;
+  List<dynamic> bxMallSubDto;
+  Null comments;
+  String image;
+
+  CategoryModel(
+      {this.mallCategoryId,
+      this.mallCategoryName,
+      this.bxMallSubDto,
+      this.image,
+      this.comments});
+
+  factory CategoryModel.fromJson(dynamic json) {
+    return CategoryModel(
+        mallCategoryId: json['mallCategoryId'],
+        mallCategoryName: json['mallCategoryName'],
+        bxMallSubDto: json['bxMallSubDto'],
+        comments: json['comments'],
+        image: json['image']);
+  }
+}
+
+CategoryListModel.dart
+
+import 'CategoryModel.dart';
+
+class CategoryListModel {
+  List<CategoryModel> categoryListModel;
+
+  CategoryListModel(this.categoryListModel);
+
+  factory CategoryListModel.fromJson(List json) {
+    return CategoryListModel(
+        json.map((index) => CategoryModel.fromJson(index)).toList());
+  }
+}
+
+
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/service/service_method.dart';
+import 'dart:convert';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
+import '../model/CategoryListModel.dart';
+
+class CategoryPage extends StatefulWidget {
+  @override
+  _CategoryPageState createState() => _CategoryPageState();
+}
+
+class _CategoryPageState extends State<CategoryPage> {
+  @override
+  Widget build(BuildContext context) {
+    _getCategory();
+    return Container(
+      child: Center(
+        child: Text('分类页面'),
+      ),
+    );
+  }
+
+  void _getCategory() async {
+    await getCategoryContent().then((value) {
+      debugPrint(value);
+      var data = json.decode(value.toString());
+      var categoryListModel = CategoryListModel.fromJson(data['data']);
+      categoryListModel.categoryListModel
+          .forEach((item) => {debugPrint(item.mallCategoryName)});
+    });
+  }
+}
+
+
+```
+
+
+### 工具
+
+> [https://javiercbk.github.io/json_to_dart/](https://javiercbk.github.io/json_to_dart/)
