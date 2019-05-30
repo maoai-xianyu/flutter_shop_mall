@@ -1843,3 +1843,273 @@ class _CategoryPageState extends State<CategoryPage> {
 ### 工具
 
 > [https://javiercbk.github.io/json_to_dart/](https://javiercbk.github.io/json_to_dart/)
+
+```
+
+CategoryConvert.dart
+
+class CategoryConvert {
+  String code;
+  String message;
+  List<CategoryConvertData> data;
+
+  CategoryConvert({this.code, this.message, this.data});
+
+  CategoryConvert.fromJson(Map<String, dynamic> json) {
+    code = json['code'];
+    message = json['message'];
+    if (json['data'] != null) {
+      data = new List<CategoryConvertData>();
+      json['data'].forEach((v) {
+        data.add(new CategoryConvertData.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['code'] = this.code;
+    data['message'] = this.message;
+    if (this.data != null) {
+      data['data'] = this.data.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class CategoryConvertData {
+  String mallCategoryId;
+  String mallCategoryName;
+  List<BxMallSubDto> bxMallSubDto;
+  Null comments;
+  String image;
+
+  CategoryConvertData(
+      {this.mallCategoryId,
+      this.mallCategoryName,
+      this.bxMallSubDto,
+      this.comments,
+      this.image});
+
+  CategoryConvertData.fromJson(Map<String, dynamic> json) {
+    mallCategoryId = json['mallCategoryId'];
+    mallCategoryName = json['mallCategoryName'];
+    if (json['bxMallSubDto'] != null) {
+      bxMallSubDto = new List<BxMallSubDto>();
+      json['bxMallSubDto'].forEach((v) {
+        bxMallSubDto.add(new BxMallSubDto.fromJson(v));
+      });
+    }
+    comments = json['comments'];
+    image = json['image'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['mallCategoryId'] = this.mallCategoryId;
+    data['mallCategoryName'] = this.mallCategoryName;
+    if (this.bxMallSubDto != null) {
+      data['bxMallSubDto'] = this.bxMallSubDto.map((v) => v.toJson()).toList();
+    }
+    data['comments'] = this.comments;
+    data['image'] = this.image;
+    return data;
+  }
+}
+
+class BxMallSubDto {
+  String mallSubId;
+  String mallCategoryId;
+  String mallSubName;
+  String comments;
+
+  BxMallSubDto(
+      {this.mallSubId, this.mallCategoryId, this.mallSubName, this.comments});
+
+  BxMallSubDto.fromJson(Map<String, dynamic> json) {
+    mallSubId = json['mallSubId'];
+    mallCategoryId = json['mallCategoryId'];
+    mallSubName = json['mallSubName'];
+    comments = json['comments'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['mallSubId'] = this.mallSubId;
+    data['mallCategoryId'] = this.mallCategoryId;
+    data['mallSubName'] = this.mallSubName;
+    data['comments'] = this.comments;
+    return data;
+  }
+}
+
+// 调用
+
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/service/service_method.dart';
+import 'dart:convert';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
+import '../model/CategoryListModel.dart';
+import '../model/CategoryConvert.dart';
+
+class CategoryPage extends StatefulWidget {
+  @override
+  _CategoryPageState createState() => _CategoryPageState();
+}
+
+class _CategoryPageState extends State<CategoryPage> {
+  @override
+  Widget build(BuildContext context) {
+    _getCategory();
+    return Container(
+      child: Center(
+        child: Text('分类页面'),
+      ),
+    );
+  }
+
+  void _getCategory() async {
+    await getCategoryContent().then((value) {
+      debugPrint(value);
+      var data = json.decode(value.toString());
+//      var categoryListModel = CategoryListModel.fromJson(data['data']);
+//      categoryListModel.categoryListModel
+//          .forEach((item) => {debugPrint(item.mallCategoryName)});
+
+      var categoryConvertModel = CategoryConvert.fromJson(data);
+      categoryConvertModel.data
+          .forEach((item) => {debugPrint(item.mallCategoryName)});
+    });
+  }
+}
+
+
+
+```
+
+
+## 第23节：左侧类别导航制作
+
+
+### 分类左侧布局
+
+```
+
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/service/service_method.dart';
+import 'dart:convert';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
+import '../model/CategoryListModel.dart';
+import '../model/CategoryConvert.dart';
+
+class CategoryPage extends StatefulWidget {
+  @override
+  _CategoryPageState createState() => _CategoryPageState();
+}
+
+class _CategoryPageState extends State<CategoryPage> {
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品分类'),
+      ),
+      body: Container(
+        child: Row(
+          children: <Widget>[
+            LeftCategoryNav(),
+            Text('分类页面'),
+          ],
+
+        ),
+      ),
+    );
+  }
+}
+
+class LeftCategoryNav extends StatefulWidget {
+  @override
+  _LeftCategoryNavState createState() => _LeftCategoryNavState();
+}
+
+class _LeftCategoryNavState extends State<LeftCategoryNav> {
+  List<CategoryConvertData> categoryConvertListData = [];
+
+  @override
+  void initState() {
+    // 获取数据
+    _getCategory();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: ScreenUtil().setWidth(180),
+      decoration: BoxDecoration(
+          border: Border(
+              right: BorderSide(
+                color: Colors.black12,
+                width: 1,
+                style: BorderStyle.solid,
+              ))),
+      child: ListView.builder(
+          itemCount: categoryConvertListData.length,
+          itemBuilder: (content, index) {
+            return _leftNavInkWell(index);
+          }),
+    );
+  }
+
+  Widget _leftNavInkWell(index) {
+    return InkWell(
+      onTap: () {
+        debugPrint("点击左侧导航");
+      },
+      child: Container(
+        height: ScreenUtil().setHeight(100),
+        padding: EdgeInsets.only(left: 10, top: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+              bottom: BorderSide(
+                width: 1,
+                color: Colors.black12,
+                style: BorderStyle.solid,
+              )),
+        ),
+        child: Text(
+          categoryConvertListData[index].mallCategoryName,
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(28),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _getCategory() async {
+    await getCategoryContent().then((value) {
+      debugPrint(value);
+      var data = json.decode(value.toString());
+//      var categoryListModel = CategoryListModel.fromJson(data['data']);
+//      categoryListModel.categoryListModel
+//          .forEach((item) => {debugPrint(item.mallCategoryName)});
+
+      var categoryConvertModel = CategoryConvert.fromJson(data);
+      setState(() {
+        categoryConvertListData = categoryConvertModel.data;
+      });
+
+      // 数据打印
+      categoryConvertModel.data
+          .forEach((item) => {debugPrint(item.mallCategoryName)});
+    });
+  }
+}
+
+```
+
+
+
