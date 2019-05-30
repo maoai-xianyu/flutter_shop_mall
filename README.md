@@ -2112,4 +2112,158 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
 ```
 
 
+## 第24节：Provide状态管理基础
+
+
+项目的商品类别页面将大量的出现类和类中间的状态变化，这就需要状态管理。现在Flutter的状态管理方案很多，redux、bloc、state、Provide。
+
+
+1. Scoped Model : 最早的状态管理方案，我刚学Flutter的时候就使用的这个，虽然还有公司在用，但是大部分已经选用其它方案了。
+2. Redux：现在国内用的最多，因为咸鱼团队一直在用，还出了自己fish redux。
+3. bloc：比Redux简单，而且好用，特别是一个页面里的状态管理，用起来很爽。
+4. state：我们首页里已经简单接触，缺点是耦合太强，如果是大型应用，管理起来非常混乱。
+5. Provide：是在Google的Github下的一个项目，刚出现不久，所以可以推测他是Google的亲儿子，用起来也是相当的爽。
+
+
+```
+dependencies:
+  provide: ^1.0.2
+  
+
+Counter.dart
+
+import 'package:flutter/material.dart';
+
+class Counter with ChangeNotifier {
+  int _value;
+
+  int get value => _value;
+
+  Counter(this._value);
+
+  void increment() {
+    _value++;
+    notifyListeners();
+  }
+}
+
+
+main.dart
+
+import 'package:flutter/material.dart';
+import './pages/index_page.dart';
+import 'package:provide/provide.dart';
+import 'provide/Counter.dart';
+
+void main() {
+  var counter = Counter(0);
+  var providers = Providers()..provide(Provider<Counter>.value(counter));
+  runApp(ProviderNode(
+    child: MyApp(),
+    providers: providers,
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: MaterialApp(
+        title: '百姓生活+',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.pink,
+        ),
+        home: IndexPage(),
+      ),
+    );
+  }
+}
+
+cart_page.dart
+
+import 'package:flutter/material.dart';
+import 'package:provide/provide.dart';
+import '../provide/Counter.dart';
+
+class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('购物车'),
+      ),
+      body: Center(
+        child: Container(
+          margin: EdgeInsets.only(top: 200),
+          child: Column(
+            children: <Widget>[
+              NumberWidget(),
+              AddButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class NumberWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Provide<Counter>(builder: (context, child, counter) {
+        return Text(
+          '${counter.value}',
+          style: Theme.of(context).textTheme.display1,
+        );
+      }),
+    );
+  }
+}
+
+class AddButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 10),
+      child: RaisedButton(
+        onPressed: () {
+          Provide.value<Counter>(context).increment();
+        },
+        child: Text('增加'),
+      ),
+    );
+  }
+}
+
+
+member_page.dart
+
+import 'package:flutter/material.dart';
+import 'package:provide/provide.dart';
+import '../provide/Counter.dart';
+
+class MemberPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('会员中心'),
+      ),
+      body: Center(
+        child: Provide<Counter>(builder: (context, child, counter) {
+          return Text(
+            '${counter.value}',
+            style: Theme.of(context).textTheme.display1,
+          );
+        }),
+      ),
+    );
+  }
+}
+
+
+
+```
 
