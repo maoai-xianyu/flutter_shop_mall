@@ -2267,3 +2267,101 @@ class MemberPage extends StatelessWidget {
 
 ```
 
+
+## 第25节 列表页_使用Provide控制子类-1
+
+
+分类右侧种类导航
+
+
+```
+
+
+class CategoryPage extends StatefulWidget {
+  @override
+  _CategoryPageState createState() => _CategoryPageState();
+}
+
+class _CategoryPageState extends State<CategoryPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品分类'),
+      ),
+      body: Container(
+        child: Row(
+          children: <Widget>[
+            LeftCategoryNav(),
+            Column(
+              children: <Widget>[
+                RightCategoryNav(),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RightCategoryNav extends StatefulWidget {
+  @override
+  _RightCategoryNavState createState() => _RightCategoryNavState();
+}
+
+class _RightCategoryNavState extends State<RightCategoryNav> {
+  List<String> listWire = [
+    '全部',
+    '名酒',
+    '宝丰',
+    '红星二锅头',
+    '北京二锅头',
+    '五粮液',
+    '汾酒',
+    '茅台'
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: ScreenUtil().setHeight(80),
+      width: ScreenUtil().setWidth(570),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            width: 1,
+            color: Colors.black12,
+            style: BorderStyle.solid,
+          ),
+        ),
+      ),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) => _rightNavItemInkWell(listWire[index]),
+        itemCount: listWire.length,
+      ),
+    );
+  }
+
+  Widget _rightNavItemInkWell(item) {
+    return InkWell(
+      onTap: () {
+        debugPrint('点击');
+      },
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        child: Text(
+          item,
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(28),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+```

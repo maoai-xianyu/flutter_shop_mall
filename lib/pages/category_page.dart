@@ -13,7 +13,6 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('商品分类'),
@@ -22,9 +21,12 @@ class _CategoryPageState extends State<CategoryPage> {
         child: Row(
           children: <Widget>[
             LeftCategoryNav(),
-            Text('分类页面'),
+            Column(
+              children: <Widget>[
+                RightCategoryNav(),
+              ],
+            ),
           ],
-
         ),
       ),
     );
@@ -53,10 +55,10 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
       decoration: BoxDecoration(
           border: Border(
               right: BorderSide(
-                color: Colors.black12,
-                width: 1,
-                style: BorderStyle.solid,
-              ))),
+        color: Colors.black12,
+        width: 1,
+        style: BorderStyle.solid,
+      ))),
       child: ListView.builder(
           itemCount: categoryConvertListData.length,
           itemBuilder: (content, index) {
@@ -77,10 +79,10 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
           color: Colors.white,
           border: Border(
               bottom: BorderSide(
-                width: 1,
-                color: Colors.black12,
-                style: BorderStyle.solid,
-              )),
+            width: 1,
+            color: Colors.black12,
+            style: BorderStyle.solid,
+          )),
         ),
         child: Text(
           categoryConvertListData[index].mallCategoryName,
@@ -109,5 +111,63 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
       categoryConvertModel.data
           .forEach((item) => {debugPrint(item.mallCategoryName)});
     });
+  }
+}
+
+class RightCategoryNav extends StatefulWidget {
+  @override
+  _RightCategoryNavState createState() => _RightCategoryNavState();
+}
+
+class _RightCategoryNavState extends State<RightCategoryNav> {
+  List<String> listWire = [
+    '全部',
+    '名酒',
+    '宝丰',
+    '红星二锅头',
+    '北京二锅头',
+    '五粮液',
+    '汾酒',
+    '茅台'
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: ScreenUtil().setHeight(80),
+      width: ScreenUtil().setWidth(570),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            width: 1,
+            color: Colors.black12,
+            style: BorderStyle.solid,
+          ),
+        ),
+      ),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) => _rightNavItemInkWell(listWire[index]),
+        itemCount: listWire.length,
+      ),
+    );
+  }
+
+  Widget _rightNavItemInkWell(item) {
+    return InkWell(
+      onTap: () {
+        debugPrint('点击');
+      },
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        child: Text(
+          item,
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(28),
+          ),
+        ),
+      ),
+    );
   }
 }
