@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provide/provide.dart';
-import '../provide/Counter.dart';
+import '../provide/counter.dart';
 
 class CartPage extends StatelessWidget {
   @override

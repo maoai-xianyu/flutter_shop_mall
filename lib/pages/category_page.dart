@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/provide/child_category.dart';
 import 'package:flutter_shop_mall/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
 import '../model/CategoryListModel.dart';
 import '../model/CategoryConvert.dart';
+import 'package:provide/provide.dart';
 
 class CategoryPage extends StatefulWidget {
   @override
@@ -40,6 +42,8 @@ class LeftCategoryNav extends StatefulWidget {
 
 class _LeftCategoryNavState extends State<LeftCategoryNav> {
   List<CategoryConvertData> categoryConvertListData = [];
+  // 用于交互效果
+  var listIndex = 0;
 
   @override
   void initState() {
@@ -53,36 +57,50 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
     return Container(
       width: ScreenUtil().setWidth(180),
       decoration: BoxDecoration(
-          border: Border(
-              right: BorderSide(
-        color: Colors.black12,
-        width: 1,
-        style: BorderStyle.solid,
-      ))),
+        border: Border(
+          right: BorderSide(
+            color: Colors.black12,
+            width: 1,
+            style: BorderStyle.solid,
+          ),
+        ),
+      ),
       child: ListView.builder(
-          itemCount: categoryConvertListData.length,
-          itemBuilder: (content, index) {
-            return _leftNavInkWell(index);
-          }),
+        itemCount: categoryConvertListData.length,
+        itemBuilder: (content, index) {
+          return _leftNavInkWell(index);
+        },
+      ),
     );
   }
 
   Widget _leftNavInkWell(index) {
+    bool isClick = false;
+    isClick = (index == listIndex) ? true : false;
     return InkWell(
       onTap: () {
-        debugPrint("点击左侧导航");
+        // 用于交互效果
+        setState(() {
+          listIndex = index;
+        });
+        debugPrint("点击左侧导航，左边显示");
+        // 点击赋值
+        var childList = categoryConvertListData[index].bxMallSubDto;
+        Provide.value<ChildCategory>(context).getChildListCategory(childList);
       },
       child: Container(
         height: ScreenUtil().setHeight(100),
         padding: EdgeInsets.only(left: 10, top: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          // 用于交互效果
+          color: isClick ? Colors.black26 : Colors.white,
           border: Border(
-              bottom: BorderSide(
-            width: 1,
-            color: Colors.black12,
-            style: BorderStyle.solid,
-          )),
+            bottom: BorderSide(
+              width: 1,
+              color: Colors.black12,
+              style: BorderStyle.solid,
+            ),
+          ),
         ),
         child: Text(
           categoryConvertListData[index].mallCategoryName,
@@ -120,41 +138,34 @@ class RightCategoryNav extends StatefulWidget {
 }
 
 class _RightCategoryNavState extends State<RightCategoryNav> {
-  List<String> listWire = [
-    '全部',
-    '名酒',
-    '宝丰',
-    '红星二锅头',
-    '北京二锅头',
-    '五粮液',
-    '汾酒',
-    '茅台'
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: ScreenUtil().setHeight(80),
-      width: ScreenUtil().setWidth(570),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            width: 1,
-            color: Colors.black12,
-            style: BorderStyle.solid,
+    // 状态管理
+    return Provide<ChildCategory>(builder: (context, child, childCategory) {
+      return Container(
+        height: ScreenUtil().setHeight(80),
+        width: ScreenUtil().setWidth(570),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              width: 1,
+              color: Colors.black12,
+              style: BorderStyle.solid,
+            ),
           ),
         ),
-      ),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => _rightNavItemInkWell(listWire[index]),
-        itemCount: listWire.length,
-      ),
-    );
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) =>
+              _rightNavItemInkWell(childCategory.bxMallSubDtoList[index]),
+          itemCount: childCategory.bxMallSubDtoList.length,
+        ),
+      );
+    });
   }
 
-  Widget _rightNavItemInkWell(item) {
+  Widget _rightNavItemInkWell(BxMallSubDto item) {
     return InkWell(
       onTap: () {
         debugPrint('点击');
@@ -162,7 +173,7 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
       child: Container(
         padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
         child: Text(
-          item,
+          item.mallSubName,
           style: TextStyle(
             fontSize: ScreenUtil().setSp(28),
           ),
