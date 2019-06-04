@@ -1,4 +1,4 @@
-import 'categoryModel_1.dart';
+import 'categoryModel.dart';
 
 class CategoryListModel {
   List<CategoryModel> categoryListModel;

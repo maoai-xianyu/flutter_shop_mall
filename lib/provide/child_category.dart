@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/categoryConvert_1.dart';
+import '../model/categoryConvert.dart';
 
 class ChildCategory with ChangeNotifier {
   List<BxMallSubDto> bxMallSubDtoList = [];

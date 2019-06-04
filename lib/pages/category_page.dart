@@ -3,8 +3,8 @@ import 'package:flutter_shop_mall/provide/child_category.dart';
 import 'package:flutter_shop_mall/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
-import '../model/categoryListModel_1.dart';
-import '../model/categoryConvert_1.dart';
+import '../model/categoryListModel.dart';
+import '../model/categoryConvert.dart';
 import '../model/categoryGoodsListModel.dart';
 import 'package:provide/provide.dart';
 
