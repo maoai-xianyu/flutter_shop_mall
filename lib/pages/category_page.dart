@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
 import '../model/CategoryListModel.dart';
 import '../model/CategoryConvert.dart';
+import '../model/categoryGoodsListModel.dart';
 import 'package:provide/provide.dart';
 
 class CategoryPage extends StatefulWidget {
@@ -213,6 +214,12 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
     await getCategoryGoods('4', "", 1).then((value) {
       var data = json.decode(value.toString());
       debugPrint('分类：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+
+      // 数据打印
+      goodsList.data
+          .forEach((item) => {debugPrint(item.goodsName)});
+
     });
   }
 }
