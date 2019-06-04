@@ -2591,3 +2591,56 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
 
 
 ```
+
+## 第27节 列表页_现有Bug修复和完善
+
+### 添加全部
+
+```
+import 'package:flutter/material.dart';
+import '../model/CategoryConvert.dart';
+
+class ChildCategory with ChangeNotifier {
+  List<BxMallSubDto> bxMallSubDtoList = [];
+
+  // 获取右边上层分类
+  getChildListCategory(List<BxMallSubDto> bxMallSubDto) {
+    BxMallSubDto addmallsubdto = BxMallSubDto();
+    addmallsubdto.mallSubId = '00';
+    addmallsubdto.mallSubName = '全部';
+    addmallsubdto.mallCategoryId = '00';
+    addmallsubdto.comments = 'null';
+    bxMallSubDtoList=[addmallsubdto];
+    bxMallSubDtoList.addAll(bxMallSubDto);
+    notifyListeners();
+  }
+}
+
+
+LeftCategoryNav.dart
+
+ void _getCategory() async {
+    await getCategoryContent().then((value) {
+      debugPrint(value);
+      var data = json.decode(value.toString());
+//      var categoryListModel = CategoryListModel.fromJson(data['data']);
+//      categoryListModel.categoryListModel
+//          .forEach((item) => {debugPrint(item.mallCategoryName)});
+
+      var categoryConvertModel = CategoryConvert.fromJson(data);
+      setState(() {
+        categoryConvertListData = categoryConvertModel.data;
+      });
+
+      // 数据打印
+      categoryConvertModel.data
+          .forEach((item) => {debugPrint(item.mallCategoryName)});
+
+      // 默认选中第一个时，显示对应的二级分类
+      Provide.value<ChildCategory>(context)
+          .getChildListCategory(categoryConvertListData[0].bxMallSubDto);
+    });
+  }
+
+
+```

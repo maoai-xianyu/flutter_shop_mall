@@ -42,6 +42,7 @@ class LeftCategoryNav extends StatefulWidget {
 
 class _LeftCategoryNavState extends State<LeftCategoryNav> {
   List<CategoryConvertData> categoryConvertListData = [];
+
   // 用于交互效果
   var listIndex = 0;
 
@@ -93,7 +94,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
         padding: EdgeInsets.only(left: 10, top: 20),
         decoration: BoxDecoration(
           // 用于交互效果
-          color: isClick ? Colors.black26 : Colors.white,
+          color: isClick ? Color.fromRGBO(236, 236, 236, 1.0) : Colors.white,
           border: Border(
             bottom: BorderSide(
               width: 1,
@@ -128,6 +129,10 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
       // 数据打印
       categoryConvertModel.data
           .forEach((item) => {debugPrint(item.mallCategoryName)});
+
+      // 默认选中第一个时，显示对应的二级分类
+      Provide.value<ChildCategory>(context)
+          .getChildListCategory(categoryConvertListData[0].bxMallSubDto);
     });
   }
 }

@@ -6,7 +6,13 @@ class ChildCategory with ChangeNotifier {
 
   // 获取右边上层分类
   getChildListCategory(List<BxMallSubDto> bxMallSubDto) {
-    bxMallSubDtoList = bxMallSubDto;
+    BxMallSubDto addmallsubdto = BxMallSubDto();
+    addmallsubdto.mallSubId = '00';
+    addmallsubdto.mallSubName = '全部';
+    addmallsubdto.mallCategoryId = '00';
+    addmallsubdto.comments = 'null';
+    bxMallSubDtoList=[addmallsubdto];
+    bxMallSubDtoList.addAll(bxMallSubDto);
     notifyListeners();
   }
 }
