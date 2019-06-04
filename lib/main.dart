@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import './pages/index_page.dart';
 import 'package:provide/provide.dart';
-import 'provide/counter.dart';
+import 'provide/counter_1.dart';
 import 'provide/child_category.dart';
 
 void main() {
