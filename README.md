@@ -2644,3 +2644,146 @@ LeftCategoryNav.dart
 
 
 ```
+
+## 第28节 列表页_商品列表后台接口调试
+
+```
+
+Future getCategoryGoods(categoryId, categorySubId, page) {
+  print('开始获取分类页面商品数据....');
+  var formData = {
+    'categoryId': categoryId,
+    'categorySubId': categorySubId,
+    'page': page
+  };
+  return request('getMallGoods', formData: formData);
+}
+
+// 方法
+Future request(url, {formData}) async {
+  try {
+    print('开始获取数据....');
+    Response response;
+    Dio dio = new Dio();
+    // 表单
+    dio.options.contentType = ContentType.parse(
+      "application/x-www-form-urlencoded",
+    );
+    print('url ${servicePath[url]}');
+    if (formData == null) {
+      response = await dio.post(servicePath[url]);
+    } else {
+      response = await dio.post(servicePath[url], data: formData);
+    }
+    if (response.statusCode == 200) {
+      print('数据返回 ${response.data}');
+      return response.data;
+    } else {
+      throw Exception('后端接口出现异常。');
+    }
+  } catch (e) {
+    return print('Error: =======>$e');
+  }
+}
+
+
+// 获取分类商品列表 可以上拉加载
+
+class CategoryGoodsList extends StatefulWidget {
+  @override
+  _CategoryGoodsListState createState() => _CategoryGoodsListState();
+}
+
+class _CategoryGoodsListState extends State<CategoryGoodsList> {
+  @override
+  void initState() {
+    _getGoodsList();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Text('商品显示'),
+    );
+  }
+
+  void _getGoodsList() async {
+    await getCategoryGoods('4', "", 1).then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类：$data');
+    });
+  }
+}
+
+```
+
+
+
+
+
+## 后端接口API文档
+
+
+URL地址是不断变化的，所以不会提供准确的地址给你们。
+
+### 商城首页基本信息
+说明：调用此接口，可获取首页所有的基本信息，包括导航，推荐商品，楼层商品。
+
+
+- 参数：lon，lat 
+
+- 接口地址：wxmini/homePageContent
+
+- 返回参数：
+1. advertesPicture:首页中部广告条。
+2. category：首页UI分类信息
+3. floor1:楼层1的商品信息和图片
+4. floor2:楼层2的商品详细和图片
+5. floor3:楼层3的商品详细和图片
+6. recommend:商品推荐的信息
+7. slides:滑动图片和对应的商品编号
+8. shopInfo：根据定位获得的门店图片和店长电话
+
+
+### 火爆专区商品列表
+
+- 参数：page
+
+- 接口地址：wxmini/homePageBelowConten
+     
+- 返回参数：
+1. image ：商品图片地址，可以直接使用。
+2. name: 商品名称
+3. mallPrice：商品商城价格
+4. price: 商品价格，指市场价格
+
+
+### 商品类别信息
+
+- 接口地址：wxmini/getCategory
+
+- 返回参数：
+
+1. mallCategoryId ： 类别ID，用于控制子类别和商品列表。
+2. mallCategoryName : 类别名称，例如“白酒”
+3. bxMallSubDto：二级类别，是个数组
+4. comments：类别描述，目前全是null
+5. image：类别图片，可能是以后扩展使用的。
+
+
+### 商品分类页中的商品列表
+
+- 接口地址：wxmini/getMallGoods
+
+- 参数：
+1. categoryId:大类ID，字符串类型
+2. categorySubId : 子类ID，字符串类型，如果没有可以填写空字符串，例如''
+3. page: 分页的页数，int类型
+
+- 返回参数 
+1. goodsId:商品的Id，用于进入商品页时，查询商品详情。 
+2. goodsName: 商品名称 
+3. image： 商品的图片 
+4. oriPrice： 市场价格（贵的价格） 
+5. presentPrice：商城价格(便宜的价格)

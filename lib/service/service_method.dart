@@ -28,6 +28,16 @@ Future getCategoryContent() {
   return request('getCategory');
 }
 
+Future getCategoryGoods(categoryId, categorySubId, page) {
+  print('开始获取分类页面商品数据....');
+  var formData = {
+    'categoryId': categoryId,
+    'categorySubId': categorySubId,
+    'page': page
+  };
+  return request('getMallGoods', formData: formData);
+}
+
 // 方法
 Future request(url, {formData}) async {
   try {
