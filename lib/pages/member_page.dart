@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provide/provide.dart';
-import '../provide/counter_1.dart';
+import '../provide/counter.dart';
 
 class MemberPage extends StatelessWidget {
   @override
