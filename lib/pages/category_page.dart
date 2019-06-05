@@ -206,12 +206,12 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
     return InkWell(
       onTap: () {
         debugPrint('点击更新分类商品数据');
+        var mallSubId = item.mallSubId;
         Provide.value<ChildCategoryProvide>(context)
-            .getCategoryChildIndex(index);
+            .getCategoryChildIndex(index, mallSubId);
 
         //获取当前分类下子类的数据
-        _getGoodsList(item.mallSubId);
-
+        _getGoodsList(mallSubId);
       },
       child: Container(
         padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
@@ -236,8 +236,13 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
       var data = json.decode(value.toString());
       debugPrint('分类：$data');
       CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
-      Provide.value<CategoryListProvide>(context)
-          .getCateGoryGoodsList(goodsList.data);
+      var subGoodsList = goodsList.data;
+      if (subGoodsList == null) {
+        Provide.value<CategoryListProvide>(context).getCateGoryGoodsList([]);
+      } else {
+        Provide.value<CategoryListProvide>(context)
+            .getCateGoryGoodsList(subGoodsList);
+      }
     });
   }
 }
@@ -254,7 +259,8 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
   @override
   Widget build(BuildContext context) {
     return Provide<CategoryListProvide>(
-      builder: (context, child, categoryListProvide) {
+        builder: (context, child, categoryListProvide) {
+      if (categoryListProvide.categoryGoodsListModel.length > 0) {
         categoryGoodsList = categoryListProvide.categoryGoodsListModel;
         return Expanded(
           child: Container(
@@ -267,8 +273,10 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
             ),
           ),
         );
-      },
-    );
+      } else {
+        return Text('暂时没有数据');
+      }
+    });
   }
 
   Widget _goodsImage(int index) {

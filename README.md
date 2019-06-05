@@ -3667,6 +3667,164 @@ class ChildCategoryProvide with ChangeNotifier {
 
 ```
 
+## 第34节：列表页_小Bug的修复
+
+```
+// 添加二级分类的状态管理id
+
+import 'package:flutter/material.dart';
+import '../model/categoryConvert.dart';
+
+class ChildCategoryProvide with ChangeNotifier {
+  List<BxMallSubDto> bxMallSubDtoList = [];
+  int childIndex = 0;
+
+  // 提供当前左边导航的id
+  String currentCategoryId = '4'; // 默认给4 这是根据数据
+  // 二级分类id
+  String currentCategorySubId = '';
+
+  // 获取右边上层分类
+  getChildListCategory(List<BxMallSubDto> bxMallSubDto, String categoryId) {
+    childIndex = 0;
+    currentCategoryId = categoryId;
+    BxMallSubDto addmallsubdto = BxMallSubDto();
+    addmallsubdto.mallSubId = '00';
+    addmallsubdto.mallSubName = '全部';
+    addmallsubdto.mallCategoryId = '00';
+    addmallsubdto.comments = 'null';
+    bxMallSubDtoList = [addmallsubdto];
+    bxMallSubDtoList.addAll(bxMallSubDto);
+    notifyListeners();
+  }
+
+  // 更新当前选择的二级分类
+  void getCategoryChildIndex(int index, String categorySubId) {
+    childIndex = index;
+    currentCategorySubId = categorySubId;
+    notifyListeners();
+  }
+}
+
+
+// 二级导航 分类下数据的状态处理
+class RightCategoryNav extends StatefulWidget {
+  @override
+  _RightCategoryNavState createState() => _RightCategoryNavState();
+}
+
+class _RightCategoryNavState extends State<RightCategoryNav> {
+  @override
+  Widget build(BuildContext context) {
+    // 状态管理
+    return Provide<ChildCategoryProvide>(
+        builder: (context, child, childCategory) {
+      return Container(
+        height: ScreenUtil().setHeight(80),
+        width: ScreenUtil().setWidth(570),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              width: 1,
+              color: Colors.black12,
+              style: BorderStyle.solid,
+            ),
+          ),
+        ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) => _rightNavItemInkWell(
+              index, childCategory.bxMallSubDtoList[index]),
+          itemCount: childCategory.bxMallSubDtoList.length,
+        ),
+      );
+    });
+  }
+
+  Widget _rightNavItemInkWell(int index, BxMallSubDto item) {
+    bool isClick = false;
+    isClick = (index == Provide.value<ChildCategoryProvide>(context).childIndex)
+        ? true
+        : false;
+    return InkWell(
+      onTap: () {
+        debugPrint('点击更新分类商品数据');
+        var mallSubId = item.mallSubId;
+        Provide.value<ChildCategoryProvide>(context)
+            .getCategoryChildIndex(index, mallSubId);
+
+        //获取当前分类下子类的数据
+        _getGoodsList(mallSubId);
+      },
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        child: Text(
+          item.mallSubName,
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(28),
+            color: isClick ? Colors.pink : Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 获取二级分类当前分类的商品数据
+  void _getGoodsList(String categorySubId) async {
+    await getCategoryGoods(
+      Provide.value<ChildCategoryProvide>(context).currentCategoryId,
+      categorySubId,
+      1,
+    ).then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      var subGoodsList = goodsList.data;
+      if (subGoodsList == null) {
+        Provide.value<CategoryListProvide>(context).getCateGoryGoodsList([]);
+      } else {
+        Provide.value<CategoryListProvide>(context)
+            .getCateGoryGoodsList(subGoodsList);
+      }
+    });
+  }
+}
+
+//商品列表 可以上拉加载
+class CategoryGoodsList extends StatefulWidget {
+  @override
+  _CategoryGoodsListState createState() => _CategoryGoodsListState();
+}
+
+class _CategoryGoodsListState extends State<CategoryGoodsList> {
+  List<CategoryGoodsListModelData> categoryGoodsList = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Provide<CategoryListProvide>(
+        builder: (context, child, categoryListProvide) {
+      if (categoryListProvide.categoryGoodsListModel.length > 0) {
+        categoryGoodsList = categoryListProvide.categoryGoodsListModel;
+        return Expanded(
+          child: Container(
+            width: ScreenUtil().setWidth(570),
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                return _goodsItemInkWell(index);
+              },
+              itemCount: categoryGoodsList.length,
+            ),
+          ),
+        );
+      } else {
+        return Text('暂时没有数据');
+      }
+    });
+  }
+}
+```
+
 
 
 

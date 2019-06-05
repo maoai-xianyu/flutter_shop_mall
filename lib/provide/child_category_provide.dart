@@ -4,11 +4,14 @@ import '../model/categoryConvert.dart';
 class ChildCategoryProvide with ChangeNotifier {
   List<BxMallSubDto> bxMallSubDtoList = [];
   int childIndex = 0;
+
   // 提供当前左边导航的id
-  String currentCategoryId;
+  String currentCategoryId = '4'; // 默认给4 这是根据数据
+  // 二级分类id
+  String currentCategorySubId = '';
 
   // 获取右边上层分类
-  getChildListCategory(List<BxMallSubDto> bxMallSubDto,String categoryId) {
+  getChildListCategory(List<BxMallSubDto> bxMallSubDto, String categoryId) {
     childIndex = 0;
     currentCategoryId = categoryId;
     BxMallSubDto addmallsubdto = BxMallSubDto();
@@ -22,8 +25,9 @@ class ChildCategoryProvide with ChangeNotifier {
   }
 
   // 更新当前选择的二级分类
-  void getCategoryChildIndex(int index) {
+  void getCategoryChildIndex(int index, String categorySubId) {
     childIndex = index;
+    currentCategorySubId = categorySubId;
     notifyListeners();
   }
 }
