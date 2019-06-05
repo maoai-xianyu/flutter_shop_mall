@@ -3549,6 +3549,123 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
 
 ```
 
+## 第33节: 列表页_子类和商品列表切换
+
+
+```
+category_page.dart
+
+// 二级导航
+class RightCategoryNav extends StatefulWidget {
+  @override
+  _RightCategoryNavState createState() => _RightCategoryNavState();
+}
+
+class _RightCategoryNavState extends State<RightCategoryNav> {
+  @override
+  Widget build(BuildContext context) {
+    // 状态管理
+    return Provide<ChildCategoryProvide>(
+        builder: (context, child, childCategory) {
+      return Container(
+        height: ScreenUtil().setHeight(80),
+        width: ScreenUtil().setWidth(570),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              width: 1,
+              color: Colors.black12,
+              style: BorderStyle.solid,
+            ),
+          ),
+        ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) => _rightNavItemInkWell(
+              index, childCategory.bxMallSubDtoList[index]),
+          itemCount: childCategory.bxMallSubDtoList.length,
+        ),
+      );
+    });
+  }
+
+  Widget _rightNavItemInkWell(int index, BxMallSubDto item) {
+    bool isClick = false;
+    isClick = (index == Provide.value<ChildCategoryProvide>(context).childIndex)
+        ? true
+        : false;
+    return InkWell(
+      onTap: () {
+        debugPrint('点击更新分类商品数据');
+        Provide.value<ChildCategoryProvide>(context)
+            .getCategoryChildIndex(index);
+
+        //获取当前分类下子类的数据
+        _getGoodsList(item.mallSubId);
+
+      },
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        child: Text(
+          item.mallSubName,
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(28),
+            color: isClick ? Colors.pink : Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 获取二级分类当前分类的商品数据
+  void _getGoodsList(String categorySubId) async {
+    await getCategoryGoods(
+      Provide.value<ChildCategoryProvide>(context).currentCategoryId,
+      categorySubId,
+      1,
+    ).then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      Provide.value<CategoryListProvide>(context)
+          .getCateGoryGoodsList(goodsList.data);
+    });
+  }
+}
+
+
+import 'package:flutter/material.dart';
+import '../model/categoryConvert.dart';
+
+class ChildCategoryProvide with ChangeNotifier {
+  List<BxMallSubDto> bxMallSubDtoList = [];
+  int childIndex = 0;
+  // 提供当前左边导航的id
+  String currentCategoryId;
+
+  // 获取右边上层分类
+  getChildListCategory(List<BxMallSubDto> bxMallSubDto,String categoryId) {
+    childIndex = 0;
+    currentCategoryId = categoryId;
+    BxMallSubDto addmallsubdto = BxMallSubDto();
+    addmallsubdto.mallSubId = '00';
+    addmallsubdto.mallSubName = '全部';
+    addmallsubdto.mallCategoryId = '00';
+    addmallsubdto.comments = 'null';
+    bxMallSubDtoList = [addmallsubdto];
+    bxMallSubDtoList.addAll(bxMallSubDto);
+    notifyListeners();
+  }
+
+  // 更新当前选择的二级分类
+  void getCategoryChildIndex(int index) {
+    childIndex = index;
+    notifyListeners();
+  }
+}
+
+```
 
 
 

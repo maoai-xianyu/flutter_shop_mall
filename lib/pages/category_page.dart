@@ -90,11 +90,12 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
         debugPrint("点击左侧导航，左边显示");
         // 点击赋值
         var childList = categoryConvertListData[index].bxMallSubDto;
-        Provide.value<ChildCategoryProvide>(context)
-            .getChildListCategory(childList);
-        // 点击之后获取当前分类下的数据
         var mallCategoryId = categoryConvertListData[index].mallCategoryId;
-        _getGoodsList(categoryId: mallCategoryId);
+        // 刷新二级横向列表
+        Provide.value<ChildCategoryProvide>(context)
+            .getChildListCategory(childList, mallCategoryId);
+        // 点击之后获取当前分类下的数据
+        _getGoodsList(mallCategoryId);
       },
       child: Container(
         height: ScreenUtil().setHeight(100),
@@ -138,18 +139,18 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
       categoryConvertListData.forEach(
           (item) => {debugPrint('左边列表数据----> ${item.mallCategoryName}')});
 
+      var mallCategoryId = categoryConvertListData[0].mallCategoryId;
       // 默认选中第一个时，显示对应的二级分类
-      Provide.value<ChildCategoryProvide>(context)
-          .getChildListCategory(categoryConvertListData[0].bxMallSubDto);
+      Provide.value<ChildCategoryProvide>(context).getChildListCategory(
+          categoryConvertListData[0].bxMallSubDto, mallCategoryId);
       // 获取第一个选中的数据的数据
-      _getGoodsList(categoryId: categoryConvertListData[0].mallCategoryId);
+      _getGoodsList(mallCategoryId);
     });
   }
 
   // 获取右边分类商品数据
-  void _getGoodsList({String categoryId}) async {
-    await getCategoryGoods(categoryId == null ? '4' : categoryId, "", 1)
-        .then((value) {
+  void _getGoodsList(String categoryId) async {
+    await getCategoryGoods(categoryId, "", 1).then((value) {
       var data = json.decode(value.toString());
       debugPrint('分类：$data');
       CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
@@ -207,6 +208,10 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
         debugPrint('点击更新分类商品数据');
         Provide.value<ChildCategoryProvide>(context)
             .getCategoryChildIndex(index);
+
+        //获取当前分类下子类的数据
+        _getGoodsList(item.mallSubId);
+
       },
       child: Container(
         padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
@@ -219,6 +224,21 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
         ),
       ),
     );
+  }
+
+  // 获取二级分类当前分类的商品数据
+  void _getGoodsList(String categorySubId) async {
+    await getCategoryGoods(
+      Provide.value<ChildCategoryProvide>(context).currentCategoryId,
+      categorySubId,
+      1,
+    ).then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      Provide.value<CategoryListProvide>(context)
+          .getCateGoryGoodsList(goodsList.data);
+    });
   }
 }
 
