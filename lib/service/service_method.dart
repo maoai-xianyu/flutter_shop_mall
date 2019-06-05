@@ -28,7 +28,7 @@ Future getCategoryContent() {
   return request('getCategory');
 }
 
-Future getCategoryGoods(categoryId, categorySubId, page) {
+Future getCategoryGoods(categoryId, String categorySubId, int page) {
   print('开始获取分类页面商品数据....');
   var formData = {
     'categoryId': categoryId,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/categoryConvert.dart';
 
-class ChildCategory with ChangeNotifier {
+class ChildCategoryProvide with ChangeNotifier {
   List<BxMallSubDto> bxMallSubDtoList = [];
 
   // 获取右边上层分类

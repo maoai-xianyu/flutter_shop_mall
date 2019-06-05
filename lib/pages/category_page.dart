@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop_mall/provide/child_category.dart';
+import 'package:flutter_shop_mall/provide/category_list_provide.dart';
+import 'package:flutter_shop_mall/provide/child_category_provide.dart';
 import 'package:flutter_shop_mall/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
@@ -89,7 +90,11 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
         debugPrint("点击左侧导航，左边显示");
         // 点击赋值
         var childList = categoryConvertListData[index].bxMallSubDto;
-        Provide.value<ChildCategory>(context).getChildListCategory(childList);
+        Provide.value<ChildCategoryProvide>(context)
+            .getChildListCategory(childList);
+        // 点击之后获取当前分类下的数据
+        var mallCategoryId = categoryConvertListData[index].mallCategoryId;
+        _getGoodsList(categoryId: mallCategoryId);
       },
       child: Container(
         height: ScreenUtil().setHeight(100),
@@ -115,10 +120,11 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
     );
   }
 
+  // 获取左边导航栏数据
   void _getCategory() async {
     await getCategoryContent().then((value) {
-      debugPrint(value);
       var data = json.decode(value.toString());
+      debugPrint('左边数据----->$data');
 //      var categoryListModel = CategoryListModel.fromJson(data['data']);
 //      categoryListModel.categoryListModel
 //          .forEach((item) => {debugPrint(item.mallCategoryName)});
@@ -129,12 +135,29 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
       });
 
       // 数据打印
-      categoryConvertModel.data
-          .forEach((item) => {debugPrint(item.mallCategoryName)});
+      categoryConvertListData.forEach(
+          (item) => {debugPrint('左边列表数据----> ${item.mallCategoryName}')});
 
       // 默认选中第一个时，显示对应的二级分类
-      Provide.value<ChildCategory>(context)
+      Provide.value<ChildCategoryProvide>(context)
           .getChildListCategory(categoryConvertListData[0].bxMallSubDto);
+      // 获取第一个选中的数据的数据
+      _getGoodsList(categoryId: categoryConvertListData[0].mallCategoryId);
+    });
+  }
+
+  // 获取右边分类商品数据
+  void _getGoodsList({String categoryId}) async {
+    await getCategoryGoods(categoryId == null ? '4' : categoryId, "", 1)
+        .then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      Provide.value<CategoryListProvide>(context)
+          .getCateGoryGoodsList(goodsList.data);
+      // 数据打印
+      goodsList.data
+          .forEach((item) => {debugPrint('右边分类列表数据---->${item.goodsName}')});
     });
   }
 }
@@ -148,7 +171,8 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
   @override
   Widget build(BuildContext context) {
     // 状态管理
-    return Provide<ChildCategory>(builder: (context, child, childCategory) {
+    return Provide<ChildCategoryProvide>(
+        builder: (context, child, childCategory) {
       return Container(
         height: ScreenUtil().setHeight(80),
         width: ScreenUtil().setWidth(570),
@@ -200,39 +224,22 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
   List<CategoryGoodsListModelData> categoryGoodsList = [];
 
   @override
-  void initState() {
-    _getGoodsList();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: ScreenUtil().setWidth(570),
-      height: ScreenUtil().setHeight(999),
-      child: ListView.builder(
-        itemBuilder: (context, index) {
-          return _goodsItemInkWell(index);
-        },
-        itemCount: categoryGoodsList.length,
-      ),
+    return Provide<CategoryListProvide>(
+      builder: (context, child, categoryListProvide) {
+        categoryGoodsList = categoryListProvide.categoryGoodsListModel;
+        return Container(
+          width: ScreenUtil().setWidth(570),
+          height: ScreenUtil().setHeight(999),
+          child: ListView.builder(
+            itemBuilder: (context, index) {
+              return _goodsItemInkWell(index);
+            },
+            itemCount: categoryGoodsList.length,
+          ),
+        );
+      },
     );
-  }
-
-  void _getGoodsList() async {
-    await getCategoryGoods('4', "", 1).then((value) {
-      var data = json.decode(value.toString());
-      debugPrint('分类：$data');
-      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
-
-      // 赋值
-      setState(() {
-        categoryGoodsList = goodsList.data;
-      });
-
-      // 数据打印
-      goodsList.data.forEach((item) => {debugPrint(item.goodsName)});
-    });
   }
 
   Widget _goodsImage(int index) {
