@@ -162,6 +162,7 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
   }
 }
 
+// 二级导航
 class RightCategoryNav extends StatefulWidget {
   @override
   _RightCategoryNavState createState() => _RightCategoryNavState();
@@ -188,18 +189,24 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
         ),
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemBuilder: (context, index) =>
-              _rightNavItemInkWell(childCategory.bxMallSubDtoList[index]),
+          itemBuilder: (context, index) => _rightNavItemInkWell(
+              index, childCategory.bxMallSubDtoList[index]),
           itemCount: childCategory.bxMallSubDtoList.length,
         ),
       );
     });
   }
 
-  Widget _rightNavItemInkWell(BxMallSubDto item) {
+  Widget _rightNavItemInkWell(int index, BxMallSubDto item) {
+    bool isClick = false;
+    isClick = (index == Provide.value<ChildCategoryProvide>(context).childIndex)
+        ? true
+        : false;
     return InkWell(
       onTap: () {
-        debugPrint('点击');
+        debugPrint('点击更新分类商品数据');
+        Provide.value<ChildCategoryProvide>(context)
+            .getCategoryChildIndex(index);
       },
       child: Container(
         padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
@@ -207,6 +214,7 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
           item.mallSubName,
           style: TextStyle(
             fontSize: ScreenUtil().setSp(28),
+            color: isClick ? Colors.pink : Colors.black,
           ),
         ),
       ),
@@ -228,14 +236,15 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
     return Provide<CategoryListProvide>(
       builder: (context, child, categoryListProvide) {
         categoryGoodsList = categoryListProvide.categoryGoodsListModel;
-        return Container(
-          width: ScreenUtil().setWidth(570),
-          height: ScreenUtil().setHeight(999),
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              return _goodsItemInkWell(index);
-            },
-            itemCount: categoryGoodsList.length,
+        return Expanded(
+          child: Container(
+            width: ScreenUtil().setWidth(570),
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                return _goodsItemInkWell(index);
+              },
+              itemCount: categoryGoodsList.length,
+            ),
           ),
         );
       },

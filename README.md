@@ -3329,6 +3329,226 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
 
 ```
 
+## 第32节：列表页_小类高亮交互效果制作
+
+### Expanded Widget的使用
+    
+Expanded Widget 是让子Widget有伸缩能力的小部件，它继承自Flexible,用法也差不多。 防止溢出
+
+```
+
+//商品列表 可以上拉加载
+class CategoryGoodsList extends StatefulWidget {
+  @override
+  _CategoryGoodsListState createState() => _CategoryGoodsListState();
+}
+
+class _CategoryGoodsListState extends State<CategoryGoodsList> {
+  List<CategoryGoodsListModelData> categoryGoodsList = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Provide<CategoryListProvide>(
+      builder: (context, child, categoryListProvide) {
+        categoryGoodsList = categoryListProvide.categoryGoodsListModel;
+        return Expanded(
+          child: Container(
+            width: ScreenUtil().setWidth(570),
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                return _goodsItemInkWell(index);
+              },
+              itemCount: categoryGoodsList.length,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _goodsImage(int index) {
+    return Container(
+      width: ScreenUtil().setWidth(200),
+      child: Image.network(categoryGoodsList[index].image),
+    );
+  }
+
+  Widget _goodsName(int index) {
+    return Container(
+      padding: EdgeInsets.all(5),
+      width: ScreenUtil().setWidth(370),
+      child: Text(
+        categoryGoodsList[index].goodsName,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: ScreenUtil().setSp(28),
+        ),
+      ),
+    );
+  }
+
+  Widget _goodsPrice(int index) {
+    return Container(
+      margin: EdgeInsets.only(top: 20),
+      width: ScreenUtil().setWidth(370),
+      child: Row(
+        children: <Widget>[
+          Text(
+            '价格：￥${categoryGoodsList[index].presentPrice}',
+            style: TextStyle(
+              color: Colors.pink,
+              fontSize: ScreenUtil().setSp(30),
+            ),
+          ),
+          Text(
+            '￥${categoryGoodsList[index].oriPrice}',
+            style: TextStyle(
+              color: Colors.black12,
+              fontSize: ScreenUtil().setSp(28),
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _goodsItemInkWell(int index) {
+    return InkWell(
+      onTap: () {
+        debugPrint("点击商品");
+      },
+      child: Container(
+        padding: EdgeInsets.only(top: 8, bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.black12,
+              style: BorderStyle.solid,
+              width: 1,
+            ),
+          ),
+        ),
+        child: Row(
+          children: <Widget>[
+            _goodsImage(index),
+            Column(
+              children: <Widget>[
+                _goodsName(index),
+                _goodsPrice(index),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+```
+
+
+### 添加分类二级分类index
+
+```
+import 'package:flutter/material.dart';
+import '../model/categoryConvert.dart';
+
+class ChildCategoryProvide with ChangeNotifier {
+  List<BxMallSubDto> bxMallSubDtoList = [];
+  int childIndex = 0;
+
+  // 获取右边上层分类
+  getChildListCategory(List<BxMallSubDto> bxMallSubDto) {
+    childIndex = 0;
+    BxMallSubDto addmallsubdto = BxMallSubDto();
+    addmallsubdto.mallSubId = '00';
+    addmallsubdto.mallSubName = '全部';
+    addmallsubdto.mallCategoryId = '00';
+    addmallsubdto.comments = 'null';
+    bxMallSubDtoList = [addmallsubdto];
+    bxMallSubDtoList.addAll(bxMallSubDto);
+    notifyListeners();
+  }
+
+  // 更新当前选择的二级分类
+  void getCategoryChildIndex(int index) {
+    childIndex = index;
+    notifyListeners();
+  }
+}
+
+```
+
+### 修改二级分类字体颜色和逻辑
+```
+category_page.dart
+
+// 二级导航
+class RightCategoryNav extends StatefulWidget {
+  @override
+  _RightCategoryNavState createState() => _RightCategoryNavState();
+}
+
+class _RightCategoryNavState extends State<RightCategoryNav> {
+  @override
+  Widget build(BuildContext context) {
+    // 状态管理
+    return Provide<ChildCategoryProvide>(
+        builder: (context, child, childCategory) {
+      return Container(
+        height: ScreenUtil().setHeight(80),
+        width: ScreenUtil().setWidth(570),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              width: 1,
+              color: Colors.black12,
+              style: BorderStyle.solid,
+            ),
+          ),
+        ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) => _rightNavItemInkWell(
+              index, childCategory.bxMallSubDtoList[index]),
+          itemCount: childCategory.bxMallSubDtoList.length,
+        ),
+      );
+    });
+  }
+
+  Widget _rightNavItemInkWell(int index, BxMallSubDto item) {
+    bool isClick = false;
+    isClick = (index == Provide.value<ChildCategoryProvide>(context).childIndex)
+        ? true
+        : false;
+    return InkWell(
+      onTap: () {
+        debugPrint('点击更新分类商品数据');
+        Provide.value<ChildCategoryProvide>(context)
+            .getCategoryChildIndex(index);
+      },
+      child: Container(
+        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+        child: Text(
+          item.mallSubName,
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(28),
+            color: isClick ? Colors.pink : Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+```
+
 
 
 
