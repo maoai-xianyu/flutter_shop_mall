@@ -3825,7 +3825,294 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
 }
 ```
 
+## 第35节: 列表页_上拉加载功能的制作
 
+### 增加page和noMoreText到Provide里
+
+1. page 用于分页加载
+2. noMoreText 用于显示没有更多数据
+
+```
+import 'package:flutter/material.dart';
+import '../model/categoryConvert.dart';
+
+class ChildCategoryProvide with ChangeNotifier {
+  List<BxMallSubDto> bxMallSubDtoList = [];
+  int childIndex = 0;
+
+  // 提供当前左边导航的id
+  String currentCategoryId = '4'; // 默认给4 这是根据数据
+  // 二级分类id
+  String currentCategorySubId = '';
+
+  // 上拉加载page
+  int page = 1;
+
+  // 上拉加载没有数据提示文案
+  String noMoreText = '';
+
+  // 获取右边上层分类
+  getChildListCategory(List<BxMallSubDto> bxMallSubDto, String categoryId) {
+    childIndex = 0;
+    currentCategoryId = categoryId;
+    page = 1;
+    noMoreText = '';
+    BxMallSubDto addmallsubdto = BxMallSubDto();
+    addmallsubdto.mallSubId = '';
+    addmallsubdto.mallSubName = '全部';
+    addmallsubdto.mallCategoryId = categoryId;
+    addmallsubdto.comments = 'null';
+    bxMallSubDtoList = [addmallsubdto];
+    bxMallSubDtoList.addAll(bxMallSubDto);
+    notifyListeners();
+  }
+
+  // 更新当前选择的二级分类
+  void getCategoryChildIndex(int index, String categorySubId) {
+    childIndex = index;
+    currentCategorySubId = categorySubId;
+    page = 1;
+    noMoreText = '';
+    notifyListeners();
+  }
+
+  // 增加当前页面数 page, 不改变页面不用 notifyListeners();
+  void addCurrentPage() {
+    page++;
+  }
+
+  // 显示当前没有数据提示文案
+  void changeCurrentNoMoreText(String currentNoMoreText) {
+    noMoreText = currentNoMoreText;
+    notifyListeners();
+  }
+}
+
+```
+
+### 增加EasyRefresh组件，切换类别返回顶部
+
+1. 增加EasyRefresh组件
+2. 切换类别返回顶部 需要添加组件对应的控制器  listview 的是 ScrollController() _scrollController.jumpTo(0);
+
+```
+ListView.builder(
+     controller: _scrollController,
+     itemBuilder: (context, index) {
+        return _goodsItemInkWell(index);
+     },
+    itemCount: categoryGoodsList.length,
+)
+
+```
+3. 注意接口的修改  _getGoodsMoreList();
+
+```
+//商品列表 可以上拉加载
+class CategoryGoodsList extends StatefulWidget {
+  @override
+  _CategoryGoodsListState createState() => _CategoryGoodsListState();
+}
+
+class _CategoryGoodsListState extends State<CategoryGoodsList> {
+  List<CategoryGoodsListModelData> categoryGoodsList = [];
+  GlobalKey<RefreshFooterState> _footerKey =
+      new GlobalKey<RefreshFooterState>();
+
+  GlobalKey<EasyRefreshState> _easyRefreshKey =
+      new GlobalKey<EasyRefreshState>();
+
+  var _scrollController = new ScrollController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Provide<CategoryListProvide>(
+        builder: (context, child, categoryListProvide) {
+      try {
+        if (Provide.value<ChildCategoryProvide>(context).page == 1) {
+          _scrollController.jumpTo(0);
+        }
+      } catch (e) {
+        debugPrint('第一次进入页面防错$e');
+      }
+
+      if (categoryListProvide.categoryGoodsListModel.length > 0) {
+        categoryGoodsList = categoryListProvide.categoryGoodsListModel;
+
+        return Expanded(
+          child: Container(
+            width: ScreenUtil().setWidth(570),
+            child: EasyRefresh(
+              child: ListView.builder(
+                controller: _scrollController,
+                itemBuilder: (context, index) {
+                  return _goodsItemInkWell(index);
+                },
+                itemCount: categoryGoodsList.length,
+              ),
+              key: _easyRefreshKey,
+              // 上拉加载，footer设置
+              refreshFooter: ClassicsFooter(
+                key: _footerKey,
+                bgColor: Colors.white,
+                textColor: Colors.pink,
+                moreInfoColor: Colors.pink,
+                showMore: true,
+                noMoreText:
+                    Provide.value<ChildCategoryProvide>(context).noMoreText,
+                //moreInfo: '加载...',
+                moreInfo: '...',
+                loadReadyText: '上拉加载开始',
+                loadingText: '加载中',
+                //loadedText: '加载完成...',
+                //loadText: '上拉加载...',
+              ),
+              loadMore: () async {
+                debugPrint('上拉获取更多数据');
+                _getGoodsMoreList();
+              },
+            ),
+          ),
+        );
+      } else {
+        return Text('暂时没有数据');
+      }
+    });
+  }
+
+  // 获取二级分类当前分类的商品数据
+  void _getGoodsMoreList() async {
+    // 增加page++
+    Provide.value<ChildCategoryProvide>(context).addCurrentPage();
+    await getCategoryGoods(
+            Provide.value<ChildCategoryProvide>(context).currentCategoryId,
+            Provide.value<ChildCategoryProvide>(context).currentCategorySubId,
+            Provide.value<ChildCategoryProvide>(context).page)
+        .then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类商品more：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      var subGoodsList = goodsList.data;
+      if (subGoodsList == null) {
+        Provide.value<ChildCategoryProvide>(context)
+            .changeCurrentNoMoreText('没有更多数据了');
+      } else {
+        Provide.value<CategoryListProvide>(context)
+            .getCateGoryGoodsMoreList(subGoodsList);
+      }
+    });
+  }
+
+  Widget _goodsImage(int index) {
+    return Container(
+      width: ScreenUtil().setWidth(200),
+      child: Image.network(categoryGoodsList[index].image),
+    );
+  }
+
+  Widget _goodsName(int index) {
+    return Container(
+      padding: EdgeInsets.all(5),
+      width: ScreenUtil().setWidth(370),
+      child: Text(
+        categoryGoodsList[index].goodsName,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: ScreenUtil().setSp(28),
+        ),
+      ),
+    );
+  }
+
+  Widget _goodsPrice(int index) {
+    return Container(
+      margin: EdgeInsets.only(top: 20),
+      width: ScreenUtil().setWidth(370),
+      child: Row(
+        children: <Widget>[
+          Text(
+            '价格：￥${categoryGoodsList[index].presentPrice}',
+            style: TextStyle(
+              color: Colors.pink,
+              fontSize: ScreenUtil().setSp(30),
+            ),
+          ),
+          Text(
+            '￥${categoryGoodsList[index].oriPrice}',
+            style: TextStyle(
+              color: Colors.black12,
+              fontSize: ScreenUtil().setSp(28),
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _goodsItemInkWell(int index) {
+    return InkWell(
+      onTap: () {
+        debugPrint("点击商品");
+      },
+      child: Container(
+        padding: EdgeInsets.only(top: 8, bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.black12,
+              style: BorderStyle.solid,
+              width: 1,
+            ),
+          ),
+        ),
+        child: Row(
+          children: <Widget>[
+            _goodsImage(index),
+            Column(
+              children: <Widget>[
+                _goodsName(index),
+                _goodsPrice(index),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+```
+
+### 二级横向分类中全部的数据判断
+
+问题：如果二级分类下没有数据，显示暂时没有数据，这是切换到全部，则显示不了数据
+
+解决：需要添加全部tab栏的处理
+
+```
+// 获取二级分类当前分类的商品数据
+  void _getGoodsList(String categorySubId, String mallSubName) async {
+    await getCategoryGoods(
+      Provide.value<ChildCategoryProvide>(context).currentCategoryId,
+      mallSubName == '全部' ? "" : categorySubId,
+      1,
+    ).then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      var subGoodsList = goodsList.data;
+      if (subGoodsList == null) {
+        Provide.value<CategoryListProvide>(context).getCateGoryGoodsList([]);
+      } else {
+        Provide.value<CategoryListProvide>(context)
+            .getCateGoryGoodsList(subGoodsList);
+      }
+    });
+  }
+```
 
 
 

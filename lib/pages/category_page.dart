@@ -8,6 +8,7 @@ import '../model/categoryListModel.dart';
 import '../model/categoryConvert.dart';
 import '../model/categoryGoodsListModel.dart';
 import 'package:provide/provide.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 
 class CategoryPage extends StatefulWidget {
   @override
@@ -207,11 +208,12 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
       onTap: () {
         debugPrint('点击更新分类商品数据');
         var mallSubId = item.mallSubId;
+        var mallSubName = item.mallSubName;
         Provide.value<ChildCategoryProvide>(context)
             .getCategoryChildIndex(index, mallSubId);
 
         //获取当前分类下子类的数据
-        _getGoodsList(mallSubId);
+        _getGoodsList(mallSubId, mallSubName);
       },
       child: Container(
         padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
@@ -227,10 +229,10 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
   }
 
   // 获取二级分类当前分类的商品数据
-  void _getGoodsList(String categorySubId) async {
+  void _getGoodsList(String categorySubId, String mallSubName) async {
     await getCategoryGoods(
       Provide.value<ChildCategoryProvide>(context).currentCategoryId,
-      categorySubId,
+      mallSubName == '全部' ? "" : categorySubId,
       1,
     ).then((value) {
       var data = json.decode(value.toString());
@@ -255,26 +257,89 @@ class CategoryGoodsList extends StatefulWidget {
 
 class _CategoryGoodsListState extends State<CategoryGoodsList> {
   List<CategoryGoodsListModelData> categoryGoodsList = [];
+  GlobalKey<RefreshFooterState> _footerKey =
+      new GlobalKey<RefreshFooterState>();
+
+  GlobalKey<EasyRefreshState> _easyRefreshKey =
+      new GlobalKey<EasyRefreshState>();
+
+  var _scrollController = new ScrollController();
 
   @override
   Widget build(BuildContext context) {
     return Provide<CategoryListProvide>(
         builder: (context, child, categoryListProvide) {
+      try {
+        if (Provide.value<ChildCategoryProvide>(context).page == 1) {
+          _scrollController.jumpTo(0);
+        }
+      } catch (e) {
+        debugPrint('第一次进入页面防错$e');
+      }
+
       if (categoryListProvide.categoryGoodsListModel.length > 0) {
         categoryGoodsList = categoryListProvide.categoryGoodsListModel;
+
         return Expanded(
           child: Container(
             width: ScreenUtil().setWidth(570),
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                return _goodsItemInkWell(index);
+            child: EasyRefresh(
+              child: ListView.builder(
+                controller: _scrollController,
+                itemBuilder: (context, index) {
+                  return _goodsItemInkWell(index);
+                },
+                itemCount: categoryGoodsList.length,
+              ),
+              key: _easyRefreshKey,
+              // 上拉加载，footer设置
+              refreshFooter: ClassicsFooter(
+                key: _footerKey,
+                bgColor: Colors.white,
+                textColor: Colors.pink,
+                moreInfoColor: Colors.pink,
+                showMore: true,
+                noMoreText:
+                    Provide.value<ChildCategoryProvide>(context).noMoreText,
+                //moreInfo: '加载...',
+                moreInfo: '...',
+                loadReadyText: '上拉加载开始',
+                loadingText: '加载中',
+                //loadedText: '加载完成...',
+                //loadText: '上拉加载...',
+              ),
+              loadMore: () async {
+                debugPrint('上拉获取更多数据');
+                _getGoodsMoreList();
               },
-              itemCount: categoryGoodsList.length,
             ),
           ),
         );
       } else {
         return Text('暂时没有数据');
+      }
+    });
+  }
+
+  // 获取二级分类当前分类的商品数据
+  void _getGoodsMoreList() async {
+    // 增加page++
+    Provide.value<ChildCategoryProvide>(context).addCurrentPage();
+    await getCategoryGoods(
+            Provide.value<ChildCategoryProvide>(context).currentCategoryId,
+            Provide.value<ChildCategoryProvide>(context).currentCategorySubId,
+            Provide.value<ChildCategoryProvide>(context).page)
+        .then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类商品more：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      var subGoodsList = goodsList.data;
+      if (subGoodsList == null) {
+        Provide.value<ChildCategoryProvide>(context)
+            .changeCurrentNoMoreText('没有更多数据了');
+      } else {
+        Provide.value<CategoryListProvide>(context)
+            .getCateGoryGoodsMoreList(subGoodsList);
       }
     });
   }

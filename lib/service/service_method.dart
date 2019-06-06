@@ -48,7 +48,7 @@ Future request(url, {formData}) async {
     dio.options.contentType = ContentType.parse(
       "application/x-www-form-urlencoded",
     );
-    print('url ${servicePath[url]}');
+    print('url ${servicePath[url]} + fromdata${formData}');
     if (formData == null) {
       response = await dio.post(servicePath[url]);
     } else {

@@ -8,4 +8,10 @@ class CategoryListProvide with ChangeNotifier {
     categoryGoodsListModel = list;
     notifyListeners();
   }
+
+  // 加载更多显示的数据
+  getCateGoryGoodsMoreList(List<CategoryGoodsListModelData> list) {
+    categoryGoodsListModel.addAll(list);
+    notifyListeners();
+  }
 }
