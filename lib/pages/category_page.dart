@@ -9,6 +9,7 @@ import '../model/categoryConvert.dart';
 import '../model/categoryGoodsListModel.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CategoryPage extends StatefulWidget {
   @override
@@ -208,12 +209,11 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
       onTap: () {
         debugPrint('点击更新分类商品数据');
         var mallSubId = item.mallSubId;
-        var mallSubName = item.mallSubName;
         Provide.value<ChildCategoryProvide>(context)
             .getCategoryChildIndex(index, mallSubId);
 
         //获取当前分类下子类的数据
-        _getGoodsList(mallSubId, mallSubName);
+        _getGoodsList(mallSubId);
       },
       child: Container(
         padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
@@ -229,10 +229,10 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
   }
 
   // 获取二级分类当前分类的商品数据
-  void _getGoodsList(String categorySubId, String mallSubName) async {
+  void _getGoodsList(String categorySubId) async {
     await getCategoryGoods(
       Provide.value<ChildCategoryProvide>(context).currentCategoryId,
-      mallSubName == '全部' ? "" : categorySubId,
+      categorySubId,
       1,
     ).then((value) {
       var data = json.decode(value.toString());
@@ -335,6 +335,15 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
       CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
       var subGoodsList = goodsList.data;
       if (subGoodsList == null) {
+        Fluttertoast.showToast(
+          msg: '没有更多数据了',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          backgroundColor: Colors.pink,
+          textColor: Colors.white,
+          fontSize: ScreenUtil().setSp(16),
+        );
         Provide.value<ChildCategoryProvide>(context)
             .changeCurrentNoMoreText('没有更多数据了');
       } else {

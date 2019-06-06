@@ -4114,6 +4114,73 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
   }
 ```
 
+## 第36节：FlutterToast 组件的介绍
+
+> [FlutterToast](https://github.com/PonnamKarthik/FlutterToast)
+
+
+### FlutterToast
+
+1. msg：提示的文字，String类型。
+2. toastLength: 提示的样式，主要是长度，有两个值可以选择：Toast.LENGTH_SHORT ：短模式，就是比较短。Toast.LENGTH_LONG : 长模式，就是比较长。
+3. gravity：提示出现的位置，分别是上中下，三个选项。ToastGravity.TOP顶部提示，ToastGravit.CENTER中部提示，ToastGravity.BOTTOM底部提示。
+4. bgcolor: 背景颜色，跟从Flutter颜色。
+5. textcolor：文字的颜色。
+6. fontSize： 文字的大小。
+
+```
+pubspec.yaml
+fluttertoast: ^3.1.0
+
+Fluttertoast.showToast(
+        msg: "This is Center Short Toast",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIos: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+
+```
+
+```
+
+// 获取二级分类当前分类的商品数据
+  void _getGoodsMoreList() async {
+    // 增加page++
+    Provide.value<ChildCategoryProvide>(context).addCurrentPage();
+    await getCategoryGoods(
+            Provide.value<ChildCategoryProvide>(context).currentCategoryId,
+            Provide.value<ChildCategoryProvide>(context).currentCategorySubId,
+            Provide.value<ChildCategoryProvide>(context).page)
+        .then((value) {
+      var data = json.decode(value.toString());
+      debugPrint('分类商品more：$data');
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      var subGoodsList = goodsList.data;
+      if (subGoodsList == null) {
+        Fluttertoast.showToast(
+          msg: '没有更多数据了',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          backgroundColor: Colors.pink,
+          textColor: Colors.white,
+          fontSize: ScreenUtil().setSp(16),
+        );
+        Provide.value<ChildCategoryProvide>(context)
+            .changeCurrentNoMoreText('没有更多数据了');
+      } else {
+        Provide.value<CategoryListProvide>(context)
+            .getCateGoryGoodsMoreList(subGoodsList);
+      }
+    });
+```
+
+
+
+
 
 
 
