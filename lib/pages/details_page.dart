@@ -9,10 +9,37 @@ class DetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
-    debugPrint(".....测试");
-    return Container(
-      child: Text('商品id $goodsId'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品详情页'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: FutureBuilder(
+        future: _getGoodDetail(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              child: Column(
+                children: <Widget>[
+                  Text('商品id+$goodsId'),
+                ],
+              ),
+            );
+          } else {
+            return Text('加载中.....');
+          }
+        },
+      ),
     );
+  }
+
+  Future _getGoodDetail(BuildContext context) async {
+    Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
+    return "完成加载";
   }
 }

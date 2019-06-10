@@ -4734,7 +4734,60 @@ class DetailsPage extends StatelessWidget {
 
 ```
 
-###
+## 第42节：详细页UI主页面架构搭建
+
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:provide/provide.dart';
+
+class DetailsPage extends StatelessWidget {
+  final String goodsId;
+
+  DetailsPage(this.goodsId);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品详情页'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: FutureBuilder(
+        future: _getGoodDetail(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              child: Column(
+                children: <Widget>[
+                  Text('商品id+$goodsId'),
+                ],
+              ),
+            );
+          } else {
+            return Text('加载中.....');
+          }
+        },
+      ),
+    );
+  }
+
+  Future _getGoodDetail(BuildContext context) async {
+    Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
+    return "完成加载";
+  }
+}
+
+```
+
+
+
 
 
 ## 后端接口API文档
