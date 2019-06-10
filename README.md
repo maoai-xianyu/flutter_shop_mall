@@ -4238,10 +4238,49 @@ Handler detailsHandler = Handler(
 
 ```
 
+## 第39节：路由 fluro 的路由配置和静态化
+
+Hanlder只是对每个路由的独立配置文件，fluro当然还需要一个总体配置文件
+
+### 配置路由
+
+我们还需要对路由有一个总体的配置，比如跟目录，出现不存在的路径如何显示，工作中我们经常把这个文件单独写一个文件。在routes.dart里，新建一个routes.dart文件。
+
+```
+
+import 'package:flutter/material.dart';
+import 'package:fluro/fluro.dart';
+import 'router_handler.dart';
+
+class Routers {
+  static String root = '/';
+  static String detailPage = '/details';
+
+  static void configureRouters(Router router) {
+    router.notFoundHandler = new Handler(handlerFunc:
+        (BuildContext context, Map<String, List<String>> parameters) {
+      debugPrint('没有发现对应要跳转的页面');
+    });
+
+    router.define(detailPage, handler: detailsHandler);
+  }
+
+}
+
+```
 
 
+### 把Fluro的Router静态化
 
+这一步就是为了使用方便，直接把Router进行静态化，这样在任何一个页面都可以直接进行使用了
 
+```
+import 'package:fluro/fluro.dart';
+
+class Application{
+  static Router router;
+}
+```
 
 
 
