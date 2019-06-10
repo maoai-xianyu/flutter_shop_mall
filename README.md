@@ -4210,6 +4210,35 @@ class DetailsPage extends StatelessWidget {
 ```
 
 
+## 第38节：路由 fluro 中Handler文件编写
+
+handler就是每个路由的规则，编写handler就是配置路由规则，比如我们要传递参数，参数的值是什么，这些都需要在Handler中完成。
+
+### 初始化Fluro
+
+```
+final router = Router();
+```
+
+### 编写rotuer_handler
+
+handler相当于一个路由的规则，比如我们要到详细页面，这时候就需要传递商品的ID，那就要写一个handler。
+
+```
+import 'package:flutter/material.dart';
+import 'package:fluro/fluro.dart';
+import 'package:flutter_shop_mall/pages/details_page.dart';
+
+Handler detailsHandler = Handler(
+    handlerFunc: (BuildContext context, Map<String, List<String>> parameters) {
+  String goodsId = parameters['id'].first;
+  debugPrint('商品路由传入的id 是 $goodsId');
+  return DetailsPage(goodsId);
+});
+
+```
+
+
 
 
 
