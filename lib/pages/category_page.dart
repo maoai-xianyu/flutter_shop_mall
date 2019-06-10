@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop_mall/provide/category_list_provide.dart';
 import 'package:flutter_shop_mall/provide/child_category_provide.dart';
+import 'package:flutter_shop_mall/routers/application.dart';
+import 'package:flutter_shop_mall/routers/routers.dart';
 import 'package:flutter_shop_mall/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
@@ -405,7 +407,10 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
   Widget _goodsItemInkWell(int index) {
     return InkWell(
       onTap: () {
-        debugPrint("点击商品");
+        debugPrint("分类点击商品");
+        Application.router.navigateTo(context,
+            Routers.detailPage + '?id=${categoryGoodsList[index].goodsId}',
+            transition: TransitionType.inFromRight);
       },
       child: Container(
         padding: EdgeInsets.only(top: 8, bottom: 8),

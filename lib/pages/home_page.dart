@@ -1,4 +1,7 @@
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/routers/application.dart';
+import 'package:flutter_shop_mall/routers/routers.dart';
 import '../service/service_method.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert'; // 导入json
@@ -191,6 +194,9 @@ class _HomePageState extends State<HomePage>
         return InkWell(
           onTap: () {
             debugPrint('点击火爆商品');
+            Application.router.navigateTo(
+                context, Routers.detailPage + '?id=${value['goodsId']}',
+                transition: TransitionType.inFromRight);
           },
           child: Container(
             width: ScreenUtil().setWidth(372),

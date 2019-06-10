@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/routers/application.dart';
+import 'package:flutter_shop_mall/routers/routers.dart';
 import './pages/index_page.dart';
 import 'package:provide/provide.dart';
 import 'provide/counter_provide.dart';
 import 'provide/child_category_provide.dart';
 import 'provide/category_list_provide.dart';
+import 'package:fluro/fluro.dart';
 
 void main() {
   var counter = CounterProvide(0);
@@ -22,9 +25,16 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // 路由配置
+    var router = new Router();
+    Routers.configureRouters(router);
+    Application.router = router;
+
     return Container(
       child: MaterialApp(
         title: '百姓生活+',
+        // 配置路由
+        onGenerateRoute: Application.router.generator,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.pink,

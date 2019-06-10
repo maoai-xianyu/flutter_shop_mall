@@ -4280,9 +4280,82 @@ import 'package:fluro/fluro.dart';
 class Application{
   static Router router;
 }
+
 ```
 
+## 第40节：路由 fluro 的全局注入和使用
 
+需要在main.dart文件里进行全局注入。注入后就可以爽快的使用了，配置好后的使用方法也是非常简单的。
+
+### 把路由注册到顶层
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/routers/application.dart';
+import 'package:flutter_shop_mall/routers/routers.dart';
+import './pages/index_page.dart';
+import 'package:provide/provide.dart';
+import 'provide/counter_provide.dart';
+import 'provide/child_category_provide.dart';
+import 'provide/category_list_provide.dart';
+import 'package:fluro/fluro.dart';
+
+void main() {
+  var counter = CounterProvide(0);
+  var childCategory = ChildCategoryProvide();
+  var categoryGoodsListProvide = CategoryListProvide();
+  var providers = Providers()
+    ..provide(Provider<CounterProvide>.value(counter))
+    ..provide(Provider<ChildCategoryProvide>.value(childCategory))
+    ..provide(Provider.function((context) => categoryGoodsListProvide));
+  runApp(ProviderNode(
+    child: MyApp(),
+    providers: providers,
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // 路由配置
+    var router = new Router();
+    Routers.configureRouters(router);
+    Application.router = router;
+
+    return Container(
+      child: MaterialApp(
+        title: '百姓生活+',
+        // 配置路由
+        onGenerateRoute: Application.router.generator,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.pink,
+        ),
+        home: IndexPage(),
+      ),
+    );
+  }
+}
+
+```
+
+### 在首页使用
+
+```
+debugPrint('点击火爆商品');
+Application.router.navigateTo(
+                context, Routers.detailPage + '?id=${value['goodsId']}',
+                transition: TransitionType.inFromRight);
+```
+
+### 分类中使用
+
+```
+debugPrint("分类点击商品");
+Application.router.navigateTo(context,
+            Routers.detailPage + '?id=${categoryGoodsList[index].goodsId}',
+            transition: TransitionType.inFromRight);
+```
 
 
 ## 后端接口API文档
