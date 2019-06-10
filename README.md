@@ -4178,6 +4178,38 @@ Fluttertoast.showToast(
     });
 ```
 
+## 第37节：路由 fluro 引入和商品详细页建立
+
+> [fluro https://github.com/theyakka/fluro](https://github.com/theyakka/fluro)
+
+fluro简化了Flutter的路由开发，也是目前Flutter生态中最成熟的路由框架。
+
+```
+dependencies:
+  fluro: ^1.4.0               
+```
+
+### 搭建商品详情页面
+
+```
+import 'package:flutter/material.dart';
+
+class DetailsPage extends StatelessWidget {
+  final String goodsId;
+
+  DetailsPage(this.goodsId);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Text('商品id $goodsId'),
+    );
+  }
+}
+
+```
+
+
 
 
 

@@ -10,6 +10,7 @@ import '../model/categoryGoodsListModel.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fluro/fluro.dart';
 
 class CategoryPage extends StatefulWidget {
   @override
