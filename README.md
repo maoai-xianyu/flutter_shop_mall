@@ -4358,10 +4358,387 @@ Application.router.navigateTo(context,
 ```
 
 
+## 第41节：详细页_后台数据接口调试
+
+### 接口编写
+
+```
+import 'package:dio/dio.dart';
+import 'dart:async';
+import 'dart:io';
+import '../config/service_url.dart';
+
+// 获取首页主体内容
+Future getHomePageContent() {
+  print('开始获取首页数据....');
+  var formData = {
+    'lon': '115.02932',
+    'lat': '35.76189',
+  };
+  return request('homePageContent', formData: formData);
+}
+
+// 获取火爆专区的商品
+Future getHomePageHotContent(page) {
+  print('开始火爆专区的数据....');
+  var formData = {
+    'page': page,
+  };
+  return request('homePageBelowConten', formData: formData);
+}
+
+// 获取分类页面的数据
+Future getCategoryContent() {
+  print('开始获取分类页面数据....');
+  return request('getCategory');
+}
+
+// 获取右边分类的商品数据
+Future getCategoryGoods(String categoryId, String categorySubId, int page) {
+  print('开始获取分类页面商品数据....');
+  var formData = {
+    'categoryId': categoryId,
+    'categorySubId': categorySubId,
+    'page': page
+  };
+  return request('getMallGoods', formData: formData);
+}
+
+// 获取商品详情
+Future getDetailGoods(String goodsId) {
+  print('开始获取分类页面商品数据....');
+  var formData = {
+    'goodId': goodsId,
+  };
+  return request('getGoodDetailById', formData: formData);
+}
+
+// 方法
+Future request(url, {formData}) async {
+  try {
+    print('开始获取数据....');
+    Response response;
+    Dio dio = new Dio();
+    // 表单
+    dio.options.contentType = ContentType.parse(
+      "application/x-www-form-urlencoded",
+    );
+    print('url ${servicePath[url]} + fromdata$formData');
+    if (formData == null) {
+      response = await dio.post(servicePath[url]);
+    } else {
+      response = await dio.post(servicePath[url], data: formData);
+    }
+    if (response.statusCode == 200) {
+      print('数据返回 ${response.data}');
+      return response.data;
+    } else {
+      throw Exception('后端接口出现异常。');
+    }
+  } catch (e) {
+    return print('Error: =======>$e');
+  }
+}
+
+```
+
+### 模型层编写
+
+```
+class DetailsGoodsModel {
+  String code;
+  String message;
+  DetailsGoodsModelData data;
+
+  DetailsGoodsModel({this.code, this.message, this.data});
+
+  DetailsGoodsModel.fromJson(Map<String, dynamic> json) {
+    code = json['code'];
+    message = json['message'];
+    data = json['data'] != null ? new DetailsGoodsModelData.fromJson(json['data']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['code'] = this.code;
+    data['message'] = this.message;
+    if (this.data != null) {
+      data['data'] = this.data.toJson();
+    }
+    return data;
+  }
+}
+
+class DetailsGoodsModelData {
+  GoodInfo goodInfo;
+  List<GoodComments> goodComments;
+  AdvertesPicture advertesPicture;
+
+  DetailsGoodsModelData({this.goodInfo, this.goodComments, this.advertesPicture});
+
+  DetailsGoodsModelData.fromJson(Map<String, dynamic> json) {
+    goodInfo = json['goodInfo'] != null
+        ? new GoodInfo.fromJson(json['goodInfo'])
+        : null;
+    if (json['goodComments'] != null) {
+      goodComments = new List<GoodComments>();
+      json['goodComments'].forEach((v) {
+        goodComments.add(new GoodComments.fromJson(v));
+      });
+    }
+    advertesPicture = json['advertesPicture'] != null
+        ? new AdvertesPicture.fromJson(json['advertesPicture'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.goodInfo != null) {
+      data['goodInfo'] = this.goodInfo.toJson();
+    }
+    if (this.goodComments != null) {
+      data['goodComments'] = this.goodComments.map((v) => v.toJson()).toList();
+    }
+    if (this.advertesPicture != null) {
+      data['advertesPicture'] = this.advertesPicture.toJson();
+    }
+    return data;
+  }
+}
+
+class GoodInfo {
+  String image5;
+  int amount;
+  String image3;
+  String image4;
+  String goodsId;
+  String isOnline;
+  String image1;
+  String image2;
+  String goodsSerialNumber;
+  int oriPrice;
+  double presentPrice;
+  String comPic;
+  int state;
+  String shopId;
+  String goodsName;
+  String goodsDetail;
+
+  GoodInfo(
+      {this.image5,
+        this.amount,
+        this.image3,
+        this.image4,
+        this.goodsId,
+        this.isOnline,
+        this.image1,
+        this.image2,
+        this.goodsSerialNumber,
+        this.oriPrice,
+        this.presentPrice,
+        this.comPic,
+        this.state,
+        this.shopId,
+        this.goodsName,
+        this.goodsDetail});
+
+  GoodInfo.fromJson(Map<String, dynamic> json) {
+    image5 = json['image5'];
+    amount = json['amount'];
+    image3 = json['image3'];
+    image4 = json['image4'];
+    goodsId = json['goodsId'];
+    isOnline = json['isOnline'];
+    image1 = json['image1'];
+    image2 = json['image2'];
+    goodsSerialNumber = json['goodsSerialNumber'];
+    oriPrice = json['oriPrice'];
+    presentPrice = json['presentPrice'];
+    comPic = json['comPic'];
+    state = json['state'];
+    shopId = json['shopId'];
+    goodsName = json['goodsName'];
+    goodsDetail = json['goodsDetail'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['image5'] = this.image5;
+    data['amount'] = this.amount;
+    data['image3'] = this.image3;
+    data['image4'] = this.image4;
+    data['goodsId'] = this.goodsId;
+    data['isOnline'] = this.isOnline;
+    data['image1'] = this.image1;
+    data['image2'] = this.image2;
+    data['goodsSerialNumber'] = this.goodsSerialNumber;
+    data['oriPrice'] = this.oriPrice;
+    data['presentPrice'] = this.presentPrice;
+    data['comPic'] = this.comPic;
+    data['state'] = this.state;
+    data['shopId'] = this.shopId;
+    data['goodsName'] = this.goodsName;
+    data['goodsDetail'] = this.goodsDetail;
+    return data;
+  }
+}
+
+class GoodComments {
+  int sCORE;
+  String comments;
+  String userName;
+  int discussTime;
+
+  GoodComments({this.sCORE, this.comments, this.userName, this.discussTime});
+
+  GoodComments.fromJson(Map<String, dynamic> json) {
+    sCORE = json['SCORE'];
+    comments = json['comments'];
+    userName = json['userName'];
+    discussTime = json['discussTime'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['SCORE'] = this.sCORE;
+    data['comments'] = this.comments;
+    data['userName'] = this.userName;
+    data['discussTime'] = this.discussTime;
+    return data;
+  }
+}
+
+class AdvertesPicture {
+  String pICTUREADDRESS;
+  String tOPLACE;
+
+  AdvertesPicture({this.pICTUREADDRESS, this.tOPLACE});
+
+  AdvertesPicture.fromJson(Map<String, dynamic> json) {
+    pICTUREADDRESS = json['PICTURE_ADDRESS'];
+    tOPLACE = json['TO_PLACE'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['PICTURE_ADDRESS'] = this.pICTUREADDRESS;
+    data['TO_PLACE'] = this.tOPLACE;
+    return data;
+  }
+}
+
+```
+
+### 状态管理编写
+
+将业务逻辑和UI表现分开的，所以线建立一个Provide文件，所有业务逻辑将写在Provide里，然后pages文件夹里只写UI层面的东西
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/detailsGoodsModel.dart';
+import 'package:provide/provide.dart';
+import 'package:flutter_shop_mall/service/service_method.dart';
+import 'dart:convert';
+
+class DetailsGoodsProvide with ChangeNotifier {
+  DetailsGoodsModel detailsGoods;
+
+  getDetailsGoods(String goodsId) {
+    getDetailGoods(goodsId).then((value) {
+      debugPrint("----$value");
+      var data = json.decode(value.toString());
+      detailsGoods = DetailsGoodsModel.fromJson(data);
+      notifyListeners();
+    });
+  }
+}
+
+```
+
+### 顶层注入
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:flutter_shop_mall/routers/application.dart';
+import 'package:flutter_shop_mall/routers/routers.dart';
+import './pages/index_page.dart';
+import 'package:provide/provide.dart';
+import 'provide/counter_provide.dart';
+import 'provide/child_category_provide.dart';
+import 'provide/category_list_provide.dart';
+import 'package:fluro/fluro.dart';
+
+void main() {
+  var counter = CounterProvide(0);
+  var childCategory = ChildCategoryProvide();
+  var categoryGoodsListProvide = CategoryListProvide();
+  var detailsGoodsProvide = DetailsGoodsProvide();
+  var providers = Providers()
+    ..provide(Provider<CounterProvide>.value(counter))
+    ..provide(Provider<ChildCategoryProvide>.value(childCategory))
+    ..provide(Provider.function((context) => categoryGoodsListProvide))
+    ..provide(Provider.function((context) => detailsGoodsProvide));
+  runApp(ProviderNode(
+    child: MyApp(),
+    providers: providers,
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // 路由配置
+    var router = new Router();
+    Routers.configureRouters(router);
+    Application.router = router;
+
+    return Container(
+      child: MaterialApp(
+        title: '百姓生活+',
+        // 配置路由
+        onGenerateRoute: Application.router.generator,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.pink,
+        ),
+        home: IndexPage(),
+      ),
+    );
+  }
+}
+
+```
+
+### 商品详情调用
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:provide/provide.dart';
+
+class DetailsPage extends StatelessWidget {
+  final String goodsId;
+
+  DetailsPage(this.goodsId);
+
+  @override
+  Widget build(BuildContext context) {
+    Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
+    debugPrint(".....测试");
+    return Container(
+      child: Text('商品id $goodsId'),
+    );
+  }
+}
+
+```
+
+###
+
+
 ## 后端接口API文档
 
-
-URL地址是不断变化的，所以不会提供准确的地址给你们。
 
 ### 商城首页基本信息
 说明：调用此接口，可获取首页所有的基本信息，包括导航，推荐商品，楼层商品。
@@ -4381,6 +4758,906 @@ URL地址是不断变化的，所以不会提供准确的地址给你们。
 7. slides:滑动图片和对应的商品编号
 8. shopInfo：根据定位获得的门店图片和店长电话
 
+**Post**
+
+http://v.jspang.com:8088/baixing/wxmini/homePageContent
+
+{
+    "lon": "115.02932",
+    "lat": "35.76189",
+};
+
+```
+
+{
+    "code":"0",
+    "message":"success",
+    "data":{
+        "slides":[
+            {
+                "image":"http://images.baixingliangfan.cn/advertesPicture/20190116/20190116140738_7766.jpg",
+                "goodsId":"35df1fdd5d8c468ca525cd7021bd32d8"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/advertesPicture/20190116/20190116173351_2085.jpg",
+                "goodsId":"6fe4fe0fb5394c0d9b9b4792a827e029"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/advertesPicture/20190116/20190116140753_5620.jpg",
+                "goodsId":"2171c20d77c340729d5d7ebc2039c08d"
+            }
+        ],
+        "shopInfo":{
+            "leaderImage":"http://images.baixingliangfan.cn/leaderImage/20181121/20181121133310_65.jpg",
+            "leaderPhone":"03936188699"
+        },
+        "integralMallPic":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20180817/20180817080054_5422.png",
+            "TO_PLACE":"1"
+        },
+        "toShareCode":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20180629/20180629125808_7351.png",
+            "TO_PLACE":"1"
+        },
+        "recommend":[
+            {
+                "image":"http://images.baixingliangfan.cn/compressedPic/20181210150050_5409.jpg",
+                "mallPrice":329,
+                "goodsName":"(限购2瓶)沱牌品味舍得52°500ml",
+                "goodsId":"c0999c03df344e1ab322b3ce6dffdeb1",
+                "price":350
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/compressedPic/20181121172615_4947.jpg",
+                "mallPrice":558,
+                "goodsName":"红花郎15年53°500ml",
+                "goodsId":"d0a2f888f9df48609aab3ed3721d8d88",
+                "price":613.8
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/compressedPic/20181121171744_3826.jpg",
+                "mallPrice":118,
+                "goodsName":"茅台王子酒酱香型53度500ml",
+                "goodsId":"d772898204664d7596b20f1d5f4d1dfe",
+                "price":118
+            }
+        ],
+        "advertesPicture":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20190131/20190131165032_5788.png",
+            "TO_PLACE":"1"
+        },
+        "floor1":[
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116133522_9332.jpg",
+                "goodsId":"faa86c6ee451445a9475870656f04192"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116135616_4151.jpg",
+                "goodsId":"80817b9fd00b48f296ce939ae197030b"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116133626_1248.jpg",
+                "goodsId":"00cee04d12474910bfeb7930f6251c22"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116133740_8452.jpg",
+                "goodsId":"bdfa9a9a358f436594a740e486fd2060"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116133753_7874.jpg",
+                "goodsId":"516f9db6ee8e499cb8a8758cf2e567c7"
+            }
+        ],
+        "floor2":[
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116134240_8923.jpg",
+                "goodsId":"04e338da9dbd4ad9913c38e7a4ae5677"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116134314_7748.jpg",
+                "goodsId":"ca055522081f4315a654384ebb524051"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190117/20190117151627_6993.jpg",
+                "goodsId":"c0999c03df344e1ab322b3ce6dffdeb1"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116134424_3185.jpg",
+                "goodsId":"3236991d77754e47a5cbf8e5d1a04902"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116134608_5991.jpg",
+                "goodsId":"1140c709d608439d8fc85b650e0c477b"
+            }
+        ],
+        "floor3":[
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190122/20190122143838_7004.jpg",
+                "goodsId":"ec3c55fb0d4a4f68beb80dc6d1fbf7eb"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116135202_4384.jpg",
+                "goodsId":"81f919f9719e4e7498a3a53f5b294376"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190122/20190122144023_7291.jpg",
+                "goodsId":"138f0836ea664544b06f0ddba5331564"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116135302_3912.jpg",
+                "goodsId":"b7e06b8248f049d2a50ed727d5988558"
+            },
+            {
+                "image":"http://images.baixingliangfan.cn/homeFloor/20190116/20190116135334_5716.jpg",
+                "goodsId":"80cd0b81997d41ceacdf3781a36dc13d"
+            }
+        ],
+        "saoma":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20181112/20181112115518_3523.png",
+            "TO_PLACE":"1"
+        },
+        "newUser":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20190201/20190201172941_4626.png",
+            "TO_PLACE":"1"
+        },
+        "floor1Pic":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20190111/20190111080720_8987.jpg",
+            "TO_PLACE":"4"
+        },
+        "floor2Pic":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20190111/20190111080754_8924.jpg",
+            "TO_PLACE":"4"
+        },
+        "floorName":{
+            "floor1":"特产礼盒",
+            "floor2":"甄选水果",
+            "floor3":"酒！便宜"
+        },
+        "category":[
+            {
+                "mallCategoryId":"4",
+                "mallCategoryName":"白酒",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c94621970a801626a35cb4d0175",
+                        "mallCategoryId":"4",
+                        "mallSubName":"名酒",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94621970a801626a363e5a0176",
+                        "mallCategoryId":"4",
+                        "mallSubName":"宝丰",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94621970a801626a3770620177",
+                        "mallCategoryId":"4",
+                        "mallSubName":"北京二锅头",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cc035c15a8",
+                        "mallCategoryId":"4",
+                        "mallSubName":"大明",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cc2af915a9",
+                        "mallCategoryId":"4",
+                        "mallSubName":"杜康",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cc535115aa",
+                        "mallCategoryId":"4",
+                        "mallSubName":"顿丘",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cc77b215ab",
+                        "mallCategoryId":"4",
+                        "mallSubName":"汾酒",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cca72e15ac",
+                        "mallCategoryId":"4",
+                        "mallSubName":"枫林",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cccae215ad",
+                        "mallCategoryId":"4",
+                        "mallSubName":"高粱酒",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7ccf0d915ae",
+                        "mallCategoryId":"4",
+                        "mallSubName":"古井",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cd1d6715af",
+                        "mallCategoryId":"4",
+                        "mallSubName":"贵州大曲",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cd3f2815b0",
+                        "mallCategoryId":"4",
+                        "mallSubName":"国池",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cd5d3015b1",
+                        "mallCategoryId":"4",
+                        "mallSubName":"国窖",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cd7ced15b2",
+                        "mallCategoryId":"4",
+                        "mallSubName":"国台",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cd9b9015b3",
+                        "mallCategoryId":"4",
+                        "mallSubName":"汉酱",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cdbfd215b4",
+                        "mallCategoryId":"4",
+                        "mallSubName":"红星",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c946891d16801689474e2a70081",
+                        "mallCategoryId":"4",
+                        "mallSubName":"怀庄",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cdddf815b5",
+                        "mallCategoryId":"4",
+                        "mallSubName":"剑南春",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cdfd4815b6",
+                        "mallCategoryId":"4",
+                        "mallSubName":"江小白",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb1016802277c37160e",
+                        "mallCategoryId":"4",
+                        "mallSubName":"金沙",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7ce207015b7",
+                        "mallCategoryId":"4",
+                        "mallSubName":"京宫",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7ce46d415b8",
+                        "mallCategoryId":"4",
+                        "mallSubName":"酒鬼",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb101680226de23160d",
+                        "mallCategoryId":"4",
+                        "mallSubName":"口子窖",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7ce705515b9",
+                        "mallCategoryId":"4",
+                        "mallSubName":"郎酒",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7ce989e15ba",
+                        "mallCategoryId":"4",
+                        "mallSubName":"老口子",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cec30915bb",
+                        "mallCategoryId":"4",
+                        "mallSubName":"龙江家园",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cef15c15bc",
+                        "mallCategoryId":"4",
+                        "mallSubName":"泸州",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cf156f15bd",
+                        "mallCategoryId":"4",
+                        "mallSubName":"鹿邑大曲",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cf425b15be",
+                        "mallCategoryId":"4",
+                        "mallSubName":"毛铺",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cf9dc915c0",
+                        "mallCategoryId":"4",
+                        "mallSubName":"绵竹",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cfbf1c15c1",
+                        "mallCategoryId":"4",
+                        "mallSubName":"难得糊涂",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cfdd7215c2",
+                        "mallCategoryId":"4",
+                        "mallSubName":"牛二爷",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7cf71e715bf",
+                        "mallCategoryId":"4",
+                        "mallSubName":"茅台",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7d7eda715c3",
+                        "mallCategoryId":"4",
+                        "mallSubName":"绵竹",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7d96e5c15c4",
+                        "mallCategoryId":"4",
+                        "mallSubName":"难得糊涂",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dab93b15c5",
+                        "mallCategoryId":"4",
+                        "mallSubName":"牛二爷",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dae16415c6",
+                        "mallCategoryId":"4",
+                        "mallSubName":"牛栏山",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7db11cb15c7",
+                        "mallCategoryId":"4",
+                        "mallSubName":"前门",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7db430c15c8",
+                        "mallCategoryId":"4",
+                        "mallSubName":"全兴",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7db6cac15c9",
+                        "mallCategoryId":"4",
+                        "mallSubName":"舍得",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7db9a4415ca",
+                        "mallCategoryId":"4",
+                        "mallSubName":"双沟",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dc30b815cb",
+                        "mallCategoryId":"4",
+                        "mallSubName":"水井坊",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dc543e15cc",
+                        "mallCategoryId":"4",
+                        "mallSubName":"四特",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dc765c15cd",
+                        "mallCategoryId":"4",
+                        "mallSubName":"潭酒",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dc988a15ce",
+                        "mallCategoryId":"4",
+                        "mallSubName":"沱牌",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dcba5a15cf",
+                        "mallCategoryId":"4",
+                        "mallSubName":"五粮液",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dcd9e815d0",
+                        "mallCategoryId":"4",
+                        "mallSubName":"西凤",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dcf6d715d1",
+                        "mallCategoryId":"4",
+                        "mallSubName":"习酒",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dd11b215d2",
+                        "mallCategoryId":"4",
+                        "mallSubName":"小白杨",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dd2f3c15d3",
+                        "mallCategoryId":"4",
+                        "mallSubName":"洋河",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7dd969115d4",
+                        "mallCategoryId":"4",
+                        "mallSubName":"伊力特",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7ddb16c15d5",
+                        "mallCategoryId":"4",
+                        "mallSubName":"张弓",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7ddd6c715d6",
+                        "mallCategoryId":"4",
+                        "mallSubName":"中粮",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7de126815d7",
+                        "mallCategoryId":"4",
+                        "mallSubName":"竹叶青",
+                        "comments":null
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170036_4477.png"
+            },
+            {
+                "mallCategoryId":"1",
+                "mallCategoryName":"啤酒",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c946016ea9b016016f79c8e0000",
+                        "mallCategoryId":"1",
+                        "mallSubName":"百威",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94608ff843016095163b8c0177",
+                        "mallCategoryId":"1",
+                        "mallSubName":"福佳",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"402880e86016d1b5016016db9b290001",
+                        "mallCategoryId":"1",
+                        "mallSubName":"哈尔滨",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"402880e86016d1b5016016dbff2f0002",
+                        "mallCategoryId":"1",
+                        "mallSubName":"汉德",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647cd6830e0022",
+                        "mallCategoryId":"1",
+                        "mallSubName":"崂山",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647cd706a60023",
+                        "mallCategoryId":"1",
+                        "mallSubName":"林德曼",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e1411b15d8",
+                        "mallCategoryId":"1",
+                        "mallSubName":"青岛",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e1647215d9",
+                        "mallCategoryId":"1",
+                        "mallSubName":"三得利",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e182e715da",
+                        "mallCategoryId":"1",
+                        "mallSubName":"乌苏",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c9468118c9c016811ab16bf0001",
+                        "mallCategoryId":"1",
+                        "mallSubName":"雪花",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c9468118c9c016811aa6f440000",
+                        "mallCategoryId":"1",
+                        "mallSubName":"燕京",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e19b8f15db",
+                        "mallCategoryId":"1",
+                        "mallSubName":"智美",
+                        "comments":null
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170044_9165.png"
+            },
+            {
+                "mallCategoryId":"2",
+                "mallCategoryName":"葡萄酒",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c9460337d540160337fefd60000",
+                        "mallCategoryId":"2",
+                        "mallSubName":"澳大利亚",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"402880e86016d1b5016016e083f10010",
+                        "mallCategoryId":"2",
+                        "mallSubName":"德国",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"402880e86016d1b5016016df1f92000c",
+                        "mallCategoryId":"2",
+                        "mallSubName":"法国",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94621970a801626a40feac0178",
+                        "mallCategoryId":"2",
+                        "mallSubName":"南非",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e5c9a115dc",
+                        "mallCategoryId":"2",
+                        "mallSubName":"葡萄牙",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e5e68f15dd",
+                        "mallCategoryId":"2",
+                        "mallSubName":"西班牙",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e609f515de",
+                        "mallCategoryId":"2",
+                        "mallSubName":"新西兰",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e6286a15df",
+                        "mallCategoryId":"2",
+                        "mallSubName":"意大利",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e6486615e0",
+                        "mallCategoryId":"2",
+                        "mallSubName":"智利",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7e66c6815e1",
+                        "mallCategoryId":"2",
+                        "mallSubName":"中国",
+                        "comments":null
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170053_878.png"
+            },
+            {
+                "mallCategoryId":"3",
+                "mallCategoryName":"清酒洋酒",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"402880e86016d1b5016016e135440011",
+                        "mallCategoryId":"3",
+                        "mallSubName":"清酒",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"402880e86016d1b5016016e171cc0012",
+                        "mallCategoryId":"3",
+                        "mallSubName":"洋酒",
+                        "comments":""
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170101_6957.png"
+            },
+            {
+                "mallCategoryId":"5",
+                "mallCategoryName":"保健酒",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c94609a62be0160a02d1dc20021",
+                        "mallCategoryId":"5",
+                        "mallSubName":"黄酒",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94648837980164883ff6980000",
+                        "mallCategoryId":"5",
+                        "mallSubName":"药酒",
+                        "comments":""
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170110_6581.png"
+            },
+            {
+                "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+                "mallCategoryName":"预调酒",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d02f6250026",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+                        "mallSubName":"果酒",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d031bae0027",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+                        "mallSubName":"鸡尾酒",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d03428f0028",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+                        "mallSubName":"米酒",
+                        "comments":""
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170124_4760.png"
+            },
+            {
+                "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+                "mallCategoryName":"下酒小菜",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dc18e610035",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+                        "mallSubName":"熟食",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dc1d9070036",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+                        "mallSubName":"火腿",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dc1fc3e0037",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+                        "mallSubName":"速冻食品",
+                        "comments":""
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170133_4419.png"
+            },
+            {
+                "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                "mallCategoryName":"饮料",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d09cbf6002d",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                        "mallSubName":"茶饮",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d09f7e8002e",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                        "mallSubName":"水饮",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d0a27e1002f",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                        "mallSubName":"功能饮料",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d0b1d4d0030",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                        "mallSubName":"果汁",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d14192b0031",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                        "mallSubName":"含乳饮料",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647d24d9600032",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                        "mallSubName":"碳酸饮料",
+                        "comments":""
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170143_361.png"
+            },
+            {
+                "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+                "mallCategoryName":"乳制品",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd4ac8c0048",
+                        "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+                        "mallSubName":"常温纯奶",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd4f6a40049",
+                        "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+                        "mallSubName":"常温酸奶",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd51ab7004a",
+                        "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+                        "mallSubName":"低温奶",
+                        "comments":""
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170151_9234.png"
+            },
+            {
+                "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                "mallCategoryName":"休闲零食",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dc51d93003c",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"方便食品",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd204dc0040",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"面包糕点",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd22f760041",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"糖果巧克力",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd254530042",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"膨化食品",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7fa132b15e7",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"坚果炒货",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7f4bfc415e2",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"肉干豆干",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7f5027a15e3",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"饼干",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94679b4fb10167f7f530fd15e4",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"冲调",
+                        "comments":null
+                    },
+                    {
+                        "mallSubId":"2c9f6c94683a6b0d016846b49436003b",
+                        "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                        "mallSubName":"休闲水果",
+                        "comments":null
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170200_7553.png"
+            },
+            {
+                "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+                "mallCategoryName":"粮油调味",
+                "bxMallSubDto":[
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd2e8270043",
+                        "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+                        "mallSubName":"油/粮食",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd31bca0044",
+                        "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+                        "mallSubName":"调味品",
+                        "comments":""
+                    },
+                    {
+                        "mallSubId":"2c9f6c946449ea7e01647dd35a980045",
+                        "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+                        "mallSubName":"酱菜罐头",
+                        "comments":""
+                    }
+                ],
+                "comments":null,
+                "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20181212/20181212115842_9733.png"
+            }
+        ],
+        "floor3Pic":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20190111/20190111081455_1309.jpg",
+            "TO_PLACE":"4"
+        },
+        "reservationGoods":[
+
+        ]
+    }
+}
+```
+
+
+
 
 ### 火爆专区商品列表
 
@@ -4394,6 +5671,162 @@ URL地址是不断变化的，所以不会提供准确的地址给你们。
 3. mallPrice：商品商城价格
 4. price: 商品价格，指市场价格
 
+**Post**
+
+http://v.jspang.com:8088/baixing/wxmini/homePageBelowConten
+
+{
+    "page":1
+}
+
+```
+{
+    "code":"0",
+    "message":"success",
+    "data":[
+        {
+            "name":"智美9%蓝帽啤酒18.9°P330ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121171258_323.jpg",
+            "mallPrice":21.9,
+            "goodsId":"6f09c0e733b0499c81503ce457b4cf9f",
+            "price":24.09
+        },
+        {
+            "name":"波士力娇酒蛋黄味21°700ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190122093838_5979.jpg",
+            "mallPrice":98,
+            "goodsId":"cf304b822ddd4f6aa275c5e54f36abba",
+            "price":107.8
+        },
+        {
+            "name":"汉德百士菠萝啤500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121101250_3231.jpg",
+            "mallPrice":1.1,
+            "goodsId":"80a28efdb16b4fa29884095ef1399a7e",
+            "price":1.21
+        },
+        {
+            "name":"林德曼山莓味啤酒250ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121102807_7848.jpg",
+            "mallPrice":16,
+            "goodsId":"e47bf468042a4940a3b8a32d07f64d71",
+            "price":17.6
+        },
+        {
+            "name":"福佳4.9%白啤酒11.7°P330ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121100327_1855.jpg",
+            "mallPrice":12.5,
+            "goodsId":"3a79607209a044aeb1926c10bb837a75",
+            "price":13.75
+        },
+        {
+            "name":"林德曼苹果啤酒250ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121103035_1212.jpg",
+            "mallPrice":16,
+            "goodsId":"a3b789aa3fa542c6953f578b4a4d00a1",
+            "price":17.6
+        },
+        {
+            "name":"青岛啤酒10°500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121160757_296.jpg",
+            "mallPrice":4.8,
+            "goodsId":"8d3d6f79e7a34b75848b13c701ea62b4",
+            "price":5.28
+        },
+        {
+            "name":"茅台三十年礼盒",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190118163251_3984.jpg",
+            "mallPrice":10999,
+            "goodsId":"8c8117b894d94273a3ed82536ead3402",
+            "price":12098.9
+        },
+        {
+            "name":"茅台玫瑰金53°500MLl",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190118161429_6341.jpg",
+            "mallPrice":3599,
+            "goodsId":"d2168f0647924b829d95c006bf05a0ec",
+            "price":3958.9
+        },
+        {
+            "name":"茅台飞天带杯53°500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20181229210425_6614.jpg",
+            "mallPrice":1799,
+            "goodsId":"35df1fdd5d8c468ca525cd7021bd32d8",
+            "price":1978.9
+        },
+        {
+            "name":"五粮液52°1000ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190119111343_9787.jpg",
+            "mallPrice":1650,
+            "goodsId":"48209753f9f146d49ab8dca5f52de6de",
+            "price":1815
+        },
+        {
+            "name":"汾酒20青花53°500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190109172849_6508.jpg",
+            "mallPrice":379,
+            "goodsId":"81f919f9719e4e7498a3a53f5b294376",
+            "price":598
+        },
+        {
+            "name":"茅台15年53°500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190118152446_4422.jpg",
+            "mallPrice":4999,
+            "goodsId":"b093148f2e6747e9bb068efd37b6695f",
+            "price":5498.9
+        },
+        {
+            "name":"洋河蓝色经典海之蓝52°480ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190109173820_1556.jpg",
+            "mallPrice":178,
+            "goodsId":"11a401e776e44414bd886f27a1def492",
+            "price":195.8
+        },
+        {
+            "name":"汾酒30青花53°500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190109172954_1192.jpg",
+            "mallPrice":579,
+            "goodsId":"ec3c55fb0d4a4f68beb80dc6d1fbf7eb",
+            "price":636.9
+        },
+        {
+            "name":"五粮液十五年礼盒500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190119143850_275.jpg",
+            "mallPrice":2160,
+            "goodsId":"c7a5eaedb3da4e5e887fc60226812d13",
+            "price":2376
+        },
+        {
+            "name":"飞天茅台53°200ML",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190118150311_1017.jpg",
+            "mallPrice":869,
+            "goodsId":"405b4d856b7d43ed890d868011679cef",
+            "price":955.9
+        },
+        {
+            "name":"茅台飞天53° 1500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190118162327_209.jpg",
+            "mallPrice":7599,
+            "goodsId":"cd4e9ac2e21940e1b21e10ffde24dffb",
+            "price":8358.9
+        },
+        {
+            "name":"茅台飞天53° 1000ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190118162413_1873.jpg",
+            "mallPrice":3999,
+            "goodsId":"1d386b95893a4ad590fbc2b4465216f1",
+            "price":4398.9
+        },
+        {
+            "name":"泸州国窖1573（52°）500ml",
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190118110141_8950.jpg",
+            "mallPrice":729,
+            "goodsId":"04e338da9dbd4ad9913c38e7a4ae5677",
+            "price":810
+        }
+    ]
+}
+```
 
 ### 商品类别信息
 
@@ -4406,6 +5839,584 @@ URL地址是不断变化的，所以不会提供准确的地址给你们。
 3. bxMallSubDto：二级类别，是个数组
 4. comments：类别描述，目前全是null
 5. image：类别图片，可能是以后扩展使用的。
+
+**Post**
+
+http://v.jspang.com:8088/baixing/wxmini/getCategory
+
+```
+{
+    "code":"0",
+    "message":"success",
+    "data":[
+        {
+            "mallCategoryId":"4",
+            "mallCategoryName":"白酒",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c94621970a801626a35cb4d0175",
+                    "mallCategoryId":"4",
+                    "mallSubName":"名酒",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c94621970a801626a363e5a0176",
+                    "mallCategoryId":"4",
+                    "mallSubName":"宝丰",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c94621970a801626a3770620177",
+                    "mallCategoryId":"4",
+                    "mallSubName":"北京二锅头",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cc035c15a8",
+                    "mallCategoryId":"4",
+                    "mallSubName":"大明",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cc2af915a9",
+                    "mallCategoryId":"4",
+                    "mallSubName":"杜康",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cc535115aa",
+                    "mallCategoryId":"4",
+                    "mallSubName":"顿丘",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cc77b215ab",
+                    "mallCategoryId":"4",
+                    "mallSubName":"汾酒",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cca72e15ac",
+                    "mallCategoryId":"4",
+                    "mallSubName":"枫林",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cccae215ad",
+                    "mallCategoryId":"4",
+                    "mallSubName":"高粱酒",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7ccf0d915ae",
+                    "mallCategoryId":"4",
+                    "mallSubName":"古井",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cd1d6715af",
+                    "mallCategoryId":"4",
+                    "mallSubName":"贵州大曲",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cd3f2815b0",
+                    "mallCategoryId":"4",
+                    "mallSubName":"国池",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cd5d3015b1",
+                    "mallCategoryId":"4",
+                    "mallSubName":"国窖",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cd7ced15b2",
+                    "mallCategoryId":"4",
+                    "mallSubName":"国台",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cd9b9015b3",
+                    "mallCategoryId":"4",
+                    "mallSubName":"汉酱",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cdbfd215b4",
+                    "mallCategoryId":"4",
+                    "mallSubName":"红星",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c946891d16801689474e2a70081",
+                    "mallCategoryId":"4",
+                    "mallSubName":"怀庄",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cdddf815b5",
+                    "mallCategoryId":"4",
+                    "mallSubName":"剑南春",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cdfd4815b6",
+                    "mallCategoryId":"4",
+                    "mallSubName":"江小白",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb1016802277c37160e",
+                    "mallCategoryId":"4",
+                    "mallSubName":"金沙",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7ce207015b7",
+                    "mallCategoryId":"4",
+                    "mallSubName":"京宫",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7ce46d415b8",
+                    "mallCategoryId":"4",
+                    "mallSubName":"酒鬼",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb101680226de23160d",
+                    "mallCategoryId":"4",
+                    "mallSubName":"口子窖",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7ce705515b9",
+                    "mallCategoryId":"4",
+                    "mallSubName":"郎酒",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7ce989e15ba",
+                    "mallCategoryId":"4",
+                    "mallSubName":"老口子",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cec30915bb",
+                    "mallCategoryId":"4",
+                    "mallSubName":"龙江家园",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cef15c15bc",
+                    "mallCategoryId":"4",
+                    "mallSubName":"泸州",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cf156f15bd",
+                    "mallCategoryId":"4",
+                    "mallSubName":"鹿邑大曲",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cf425b15be",
+                    "mallCategoryId":"4",
+                    "mallSubName":"毛铺",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cf9dc915c0",
+                    "mallCategoryId":"4",
+                    "mallSubName":"绵竹",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cfbf1c15c1",
+                    "mallCategoryId":"4",
+                    "mallSubName":"难得糊涂",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cfdd7215c2",
+                    "mallCategoryId":"4",
+                    "mallSubName":"牛二爷",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7cf71e715bf",
+                    "mallCategoryId":"4",
+                    "mallSubName":"茅台",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7d7eda715c3",
+                    "mallCategoryId":"4",
+                    "mallSubName":"绵竹",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7d96e5c15c4",
+                    "mallCategoryId":"4",
+                    "mallSubName":"难得糊涂",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dab93b15c5",
+                    "mallCategoryId":"4",
+                    "mallSubName":"牛二爷",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dae16415c6",
+                    "mallCategoryId":"4",
+                    "mallSubName":"牛栏山",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7db11cb15c7",
+                    "mallCategoryId":"4",
+                    "mallSubName":"前门",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7db430c15c8",
+                    "mallCategoryId":"4",
+                    "mallSubName":"全兴",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7db6cac15c9",
+                    "mallCategoryId":"4",
+                    "mallSubName":"舍得",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7db9a4415ca",
+                    "mallCategoryId":"4",
+                    "mallSubName":"双沟",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dc30b815cb",
+                    "mallCategoryId":"4",
+                    "mallSubName":"水井坊",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dc543e15cc",
+                    "mallCategoryId":"4",
+                    "mallSubName":"四特",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dc765c15cd",
+                    "mallCategoryId":"4",
+                    "mallSubName":"潭酒",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dc988a15ce",
+                    "mallCategoryId":"4",
+                    "mallSubName":"沱牌",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dcba5a15cf",
+                    "mallCategoryId":"4",
+                    "mallSubName":"五粮液",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dcd9e815d0",
+                    "mallCategoryId":"4",
+                    "mallSubName":"西凤",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dcf6d715d1",
+                    "mallCategoryId":"4",
+                    "mallSubName":"习酒",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dd11b215d2",
+                    "mallCategoryId":"4",
+                    "mallSubName":"小白杨",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dd2f3c15d3",
+                    "mallCategoryId":"4",
+                    "mallSubName":"洋河",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7dd969115d4",
+                    "mallCategoryId":"4",
+                    "mallSubName":"伊力特",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7ddb16c15d5",
+                    "mallCategoryId":"4",
+                    "mallSubName":"张弓",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7ddd6c715d6",
+                    "mallCategoryId":"4",
+                    "mallSubName":"中粮",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7de126815d7",
+                    "mallCategoryId":"4",
+                    "mallSubName":"竹叶青",
+                    "comments":null
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170036_4477.png"
+        },
+        Object{...},
+        Object{...},
+        Object{...},
+        {
+            "mallCategoryId":"5",
+            "mallCategoryName":"保健酒",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c94609a62be0160a02d1dc20021",
+                    "mallCategoryId":"5",
+                    "mallSubName":"黄酒",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c94648837980164883ff6980000",
+                    "mallCategoryId":"5",
+                    "mallSubName":"药酒",
+                    "comments":""
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170110_6581.png"
+        },
+        {
+            "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+            "mallCategoryName":"预调酒",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d02f6250026",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+                    "mallSubName":"果酒",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d031bae0027",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+                    "mallSubName":"鸡尾酒",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d03428f0028",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccd76a6001b",
+                    "mallSubName":"米酒",
+                    "comments":""
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170124_4760.png"
+        },
+        {
+            "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+            "mallCategoryName":"下酒小菜",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dc18e610035",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+                    "mallSubName":"熟食",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dc1d9070036",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+                    "mallSubName":"火腿",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dc1fc3e0037",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccf3b97001d",
+                    "mallSubName":"速冻食品",
+                    "comments":""
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170133_4419.png"
+        },
+        {
+            "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+            "mallCategoryName":"饮料",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d09cbf6002d",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                    "mallSubName":"茶饮",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d09f7e8002e",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                    "mallSubName":"水饮",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d0a27e1002f",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                    "mallSubName":"功能饮料",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d0b1d4d0030",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                    "mallSubName":"果汁",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d14192b0031",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                    "mallSubName":"含乳饮料",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647d24d9600032",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccdb0e0001c",
+                    "mallSubName":"碳酸饮料",
+                    "comments":""
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170143_361.png"
+        },
+        {
+            "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+            "mallCategoryName":"乳制品",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd4ac8c0048",
+                    "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+                    "mallSubName":"常温纯奶",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd4f6a40049",
+                    "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+                    "mallSubName":"常温酸奶",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd51ab7004a",
+                    "mallCategoryId":"2c9f6c946449ea7e01647cd108b60020",
+                    "mallSubName":"低温奶",
+                    "comments":""
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170151_9234.png"
+        },
+        {
+            "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+            "mallCategoryName":"休闲零食",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dc51d93003c",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"方便食品",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd204dc0040",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"面包糕点",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd22f760041",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"糖果巧克力",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd254530042",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"膨化食品",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7fa132b15e7",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"坚果炒货",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7f4bfc415e2",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"肉干豆干",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7f5027a15e3",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"饼干",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94679b4fb10167f7f530fd15e4",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"冲调",
+                    "comments":null
+                },
+                {
+                    "mallSubId":"2c9f6c94683a6b0d016846b49436003b",
+                    "mallCategoryId":"2c9f6c946449ea7e01647ccfddb3001e",
+                    "mallSubName":"休闲水果",
+                    "comments":null
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20190131/20190131170200_7553.png"
+        },
+        {
+            "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+            "mallCategoryName":"粮油调味",
+            "bxMallSubDto":[
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd2e8270043",
+                    "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+                    "mallSubName":"油/粮食",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd31bca0044",
+                    "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+                    "mallSubName":"调味品",
+                    "comments":""
+                },
+                {
+                    "mallSubId":"2c9f6c946449ea7e01647dd35a980045",
+                    "mallCategoryId":"2c9f6c946449ea7e01647cd08369001f",
+                    "mallSubName":"酱菜罐头",
+                    "comments":""
+                }
+            ],
+            "comments":null,
+            "image":"http://images.baixingliangfan.cn/firstCategoryPicture/20181212/20181212115842_9733.png"
+        }
+    ]
+}
+```
 
 
 ### 商品分类页中的商品列表
@@ -4423,3 +6434,242 @@ URL地址是不断变化的，所以不会提供准确的地址给你们。
 3. image： 商品的图片 
 4. oriPrice： 市场价格（贵的价格） 
 5. presentPrice：商城价格(便宜的价格)
+
+**Post**
+
+http://v.jspang.com:8088/baixing/wxmini/getMallGoods
+
+全部
+
+{
+    "categoryId": "4",
+    "categorySubId": "",
+    "page": 1
+}
+
+or 二级分类下的
+
+{
+    "categoryId": "4",
+    "categorySubId": "2c9f6c94621970a801626a35cb4d0175",
+    "page": 1
+}
+
+
+```
+
+{
+    "code":"0",
+    "message":"success",
+    "data":[
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180717093312_6137.jpg",
+            "oriPrice":0.28,
+            "presentPrice":0.25,
+            "goodsName":"大大泡泡糖",
+            "goodsId":"eea505acb1944bbf8ec98ad107113874"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180717113033_1401.jpg",
+            "oriPrice":0.78,
+            "presentPrice":0.7,
+            "goodsName":"玉美鲜鱿鱼味香脆饼15g",
+            "goodsId":"2191ec0ab49f4f4da498f9f768ad5528"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180716214046_5472.jpg",
+            "oriPrice":1.11,
+            "presentPrice":1,
+            "goodsName":"劲仔鱼麻辣味12g",
+            "goodsId":"2d0c7cb285384355804dcd510bacf9cf"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180717084351_484.jpg",
+            "oriPrice":1.11,
+            "presentPrice":1,
+            "goodsName":"不二家果味大棒棒糖混合口味盒装",
+            "goodsId":"be4d7001e5994e40bff17e45a47f18db"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121101250_3231.jpg",
+            "oriPrice":1.21,
+            "presentPrice":1.1,
+            "goodsName":"汉德百士菠萝啤500ml",
+            "goodsId":"80a28efdb16b4fa29884095ef1399a7e"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190116160606_7101.jpg",
+            "oriPrice":1.5,
+            "presentPrice":1.2,
+            "goodsName":"农夫山泉天然水550ml",
+            "goodsId":"63d54204ce244418ac05aec800190cef"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190116160156_7714.jpg",
+            "oriPrice":2,
+            "presentPrice":1.4,
+            "goodsName":"怡宝纯净水555ml",
+            "goodsId":"6cd7b5875f2d4049bb1667342be34c75"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180716155456_1449.jpg",
+            "oriPrice":2.1,
+            "presentPrice":1.5,
+            "goodsName":"泡椒鸡爪（一个）",
+            "goodsId":"05b9e1b4bc6a49e580f3f5c92acbaf20"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190116161123_8945.jpg",
+            "oriPrice":1.8,
+            "presentPrice":1.5,
+            "goodsName":"娃哈哈纯净水596ml",
+            "goodsId":"22bb7be334234189ab249ba86ec94c6f"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190116145309_40.jpg",
+            "oriPrice":2.5,
+            "presentPrice":1.8,
+            "goodsName":"哈尔滨冰爽啤酒330ml",
+            "goodsId":"3194330cf25f43c3934dbb8c2a964ade"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190115185215_1051.jpg",
+            "oriPrice":2,
+            "presentPrice":1.8,
+            "goodsName":"燕京啤酒8°330ml",
+            "goodsId":"522a3511f4c545ab9547db074bb51579"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180717164555_4844.jpg",
+            "oriPrice":2.5,
+            "presentPrice":1.8,
+            "goodsName":"伊利纯鲜牛奶240ml",
+            "goodsId":"9f21e652df644c44b29e6aef27f4f56f"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190121102419_9362.jpg",
+            "oriPrice":1.98,
+            "presentPrice":1.8,
+            "goodsName":"崂山清爽8°330ml",
+            "goodsId":"bbdbd5028cc849c2998ff84fb55cb934"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180712181330_9746.jpg",
+            "oriPrice":2.5,
+            "presentPrice":1.9,
+            "goodsName":"雪花啤酒8°清爽330ml",
+            "goodsId":"87013c4315e54927a97e51d0645ece76"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190116161604_1223.jpg",
+            "oriPrice":2.22,
+            "presentPrice":2,
+            "goodsName":"天喔茶庄蜂蜜柚子茶(l利乐）250ml/盒",
+            "goodsId":"14d28dbda7214aa39ca7177144f77c8b"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190116161349_2735.jpg",
+            "oriPrice":2,
+            "presentPrice":2,
+            "goodsName":"今麦郎凉白开500ml/瓶",
+            "goodsId":"63ac261a8a964ad2b68c10df50f132db"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180716213830_6267.jpg",
+            "oriPrice":2.22,
+            "presentPrice":2,
+            "goodsName":"无穷农场盐焗鸡蛋30g",
+            "goodsId":"6a07941fe90b4483b765fffd79a01dac"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180717235006_2382.jpg",
+            "oriPrice":3,
+            "presentPrice":2,
+            "goodsName":"景田百岁山矿泉水570ml/瓶",
+            "goodsId":"a6207b017d954a0e8a5b5b137ac7329e"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20180717115346_7802.jpg",
+            "oriPrice":2.22,
+            "presentPrice":2,
+            "goodsName":"花花牛酸牛奶160g",
+            "goodsId":"babd01169b42413eac9e6fd82e21cd7b"
+        },
+        {
+            "image":"http://images.baixingliangfan.cn/compressedPic/20190116170518_7239.jpg",
+            "oriPrice":2.22,
+            "presentPrice":2,
+            "goodsName":"今麦郎芒顿小镇水蜜桃味饮料500ml",
+            "goodsId":"be7323f3e94c435081abbfdc6dac691e"
+        }
+    ]
+}
+
+
+
+```
+
+
+### 商品详情
+
+- 接口地址：wxmini/getGoodDetailById
+
+- 参数
+1. goodId 商品的Id
+
+- 返回参数
+
+1. goodInfo 商品信息
+2. goodComments 商品评价
+3. advertesPicture 广告
+
+
+**Post**
+
+http://v.jspang.com:8088/baixing/wxmini/getGoodDetailById
+
+{
+ "goodId":"035b55e444db4d308fd963543c7d884f"
+}
+
+```
+
+{
+    "code":"0",
+    "message":"success",
+    "data":{
+        "goodInfo":{
+            "image5":"",
+            "amount":10000,
+            "image3":"",
+            "image4":"",
+            "goodsId":"035b55e444db4d308fd963543c7d884f",
+            "isOnline":"yes",
+            "image1":"http://images.baixingliangfan.cn/shopGoodsImg/20190118/20190118101813_9360.jpg",
+            "image2":"",
+            "goodsSerialNumber":"6920794458051",
+            "oriPrice":3.3,
+            "presentPrice":3,
+            "comPic":"http://images.baixingliangfan.cn/compressedPic/20190118101813_9360.jpg",
+            "state":1,
+            "shopId":"402880e860166f3c0160167897d60002",
+            "goodsName":"京宫二锅头56°100ml",
+            "goodsDetail":"<img src="http://images.baixingliangfan.cn/shopGoodsDetailImg/20190118/20190118101819_6791.jpg" width="100%" height="auto" alt="" /><img src="http://images.baixingliangfan.cn/shopGoodsDetailImg/20190118/20190118101819_1891.jpg" width="100%" height="auto" alt="" /><img src="http://images.baixingliangfan.cn/shopGoodsDetailImg/20190118/20190118101819_908.jpg" width="100%" height="auto" alt="" /><img src="http://images.baixingliangfan.cn/shopGoodsDetailImg/20190118/20190118101819_5209.jpg" width="100%" height="auto" alt="" /><img src="http://images.baixingliangfan.cn/shopGoodsDetailImg/20190118/20190118101819_6593.jpg" width="100%" height="auto" alt="" />"
+        },
+        "goodComments":[
+            {
+                "SCORE":5,
+                "comments":"第一次在网上的超市购买商品，很有意思，赞���",
+                "userName":"155******30",
+                "discussTime":1549168700664
+            }
+        ],
+        "advertesPicture":{
+            "PICTURE_ADDRESS":"http://images.baixingliangfan.cn/advertesPicture/20190113/20190113134955_5825.jpg",
+            "TO_PLACE":"1"
+        }
+    }
+}
+```
+
+

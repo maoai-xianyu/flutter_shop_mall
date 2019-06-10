@@ -28,6 +28,7 @@ Future getCategoryContent() {
   return request('getCategory');
 }
 
+// 获取右边分类的商品数据
 Future getCategoryGoods(String categoryId, String categorySubId, int page) {
   print('开始获取分类页面商品数据....');
   var formData = {
@@ -36,6 +37,15 @@ Future getCategoryGoods(String categoryId, String categorySubId, int page) {
     'page': page
   };
   return request('getMallGoods', formData: formData);
+}
+
+// 获取商品详情
+Future getDetailGoods(String goodsId) {
+  print('开始获取分类页面商品数据....');
+  var formData = {
+    'goodId': goodsId,
+  };
+  return request('getGoodDetailById', formData: formData);
 }
 
 // 方法
@@ -48,7 +58,7 @@ Future request(url, {formData}) async {
     dio.options.contentType = ContentType.parse(
       "application/x-www-form-urlencoded",
     );
-    print('url ${servicePath[url]} + fromdata${formData}');
+    print('url ${servicePath[url]} + fromdata$formData');
     if (formData == null) {
       response = await dio.post(servicePath[url]);
     } else {
