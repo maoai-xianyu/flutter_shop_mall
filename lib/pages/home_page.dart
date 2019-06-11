@@ -195,8 +195,10 @@ class _HomePageState extends State<HomePage>
           onTap: () {
             debugPrint('点击火爆商品');
             Application.router.navigateTo(
-                context, Routers.detailPage + '?id=${value['goodsId']}',
-                transition: TransitionType.inFromRight);
+              context,
+              Routers.detailPage + '?id=${value['goodsId']}',
+              transition: TransitionType.inFromRight,
+            );
           },
           child: Container(
             width: ScreenUtil().setWidth(372),
@@ -267,9 +269,19 @@ class SwiperDiy extends StatelessWidget {
       width: ScreenUtil().setWidth(750),
       child: Swiper(
         itemBuilder: (BuildContext context, int index) {
-          return Image.network(
-            "${swiperDataList[index]['image']}",
-            fit: BoxFit.fill,
+          return InkWell(
+            onTap: () {
+              debugPrint('点击轮播图');
+              Application.router.navigateTo(
+                context,
+                Routers.detailPage + '?id=${swiperDataList[index]['goodsId']}',
+                transition: TransitionType.inFromRight,
+              );
+            },
+            child: Image.network(
+              "${swiperDataList[index]['image']}",
+              fit: BoxFit.fill,
+            ),
           );
         },
         itemCount: swiperDataList.length,
@@ -409,9 +421,16 @@ class Recommend extends StatelessWidget {
   }
 
   // 商品单独项
-  Widget _goodsItem(index) {
+  Widget _goodsItem(index, BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        debugPrint('商品推荐');
+        Application.router.navigateTo(
+          context,
+          Routers.detailPage + '?id=${recommendList[index]['goodsId']}',
+          transition: TransitionType.inFromRight,
+        );
+      },
       child: Container(
         height: ScreenUtil().setHeight(330),
         width: ScreenUtil().setWidth(250),
@@ -450,7 +469,7 @@ class Recommend extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           itemCount: recommendList.length,
           itemBuilder: (context, index) {
-            return _goodsItem(index);
+            return _goodsItem(index, context);
           }),
     );
   }
@@ -496,42 +515,47 @@ class FloorContent extends StatelessWidget {
     return Container(
       child: Column(
         children: <Widget>[
-          _firstRow(),
-          _otherGoods(),
+          _firstRow(context),
+          _otherGoods(context),
         ],
       ),
     );
   }
 
-  Widget _otherGoods() {
+  Widget _otherGoods(BuildContext context) {
     return Row(
       children: <Widget>[
-        _goodsItems(floorGoodsList[3]),
-        _goodsItems(floorGoodsList[4]),
+        _goodsItems(floorGoodsList[3], context),
+        _goodsItems(floorGoodsList[4], context),
       ],
     );
   }
 
-  Widget _firstRow() {
+  Widget _firstRow(BuildContext context) {
     return Row(
       children: <Widget>[
-        _goodsItems(floorGoodsList[0]),
+        _goodsItems(floorGoodsList[0], context),
         Column(
           children: <Widget>[
-            _goodsItems(floorGoodsList[1]),
-            _goodsItems(floorGoodsList[2]),
+            _goodsItems(floorGoodsList[1], context),
+            _goodsItems(floorGoodsList[2], context),
           ],
         ),
       ],
     );
   }
 
-  Widget _goodsItems(Map goods) {
+  Widget _goodsItems(Map goods, BuildContext context) {
     return Container(
       width: ScreenUtil().setWidth(375),
       child: InkWell(
         onTap: () {
-          debugPrint("点击");
+          debugPrint("楼层模块");
+          Application.router.navigateTo(
+            context,
+            Routers.detailPage + '?id=${goods['goodsId']}',
+            transition: TransitionType.inFromRight,
+          );
         },
         child: Image.network(goods['image']),
       ),

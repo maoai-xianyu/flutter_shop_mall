@@ -4787,6 +4787,122 @@ class DetailsPage extends StatelessWidget {
 ```
 
 
+## 第43节：路由_补充首页跳转到详细页
+
+
+### 首页轮播模块添加路由
+
+```
+// 首页轮播组件
+class SwiperDiy extends StatelessWidget {
+  final List swiperDataList;
+
+  SwiperDiy(this.swiperDataList);
+
+  @override
+  Widget build(BuildContext context) {
+    print('设备的像素密度${ScreenUtil.pixelRatio}');
+    print('设备的高 px ${ScreenUtil.screenHeight}');
+    print('设备的宽 px ${ScreenUtil.screenWidth}');
+    print('设备的高 dp ${ScreenUtil.screenHeightDp}');
+    print('设备的宽 dp ${ScreenUtil.screenWidthDp}');
+    return Container(
+      height: ScreenUtil().setHeight(333),
+      width: ScreenUtil().setWidth(750),
+      child: Swiper(
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+              debugPrint('点击轮播图');
+              Application.router.navigateTo(
+                context,
+                Routers.detailPage + '?id=${swiperDataList[index]['goodsId']}',
+                transition: TransitionType.inFromRight,
+              );
+            },
+            child: Image.network(
+              "${swiperDataList[index]['image']}",
+              fit: BoxFit.fill,
+            ),
+          );
+        },
+        itemCount: swiperDataList.length,
+        pagination: new SwiperPagination(),
+        autoplay: true,
+      ),
+    );
+  }
+}
+```
+
+### 商品推荐模块添加路由
+
+```
+ // 商品单独项
+Widget _goodsItem(index, BuildContext context) {
+    return InkWell(
+      onTap: () {
+        debugPrint('商品推荐');
+        Application.router.navigateTo(
+          context,
+          Routers.detailPage + '?id=${recommendList[index]['goodsId']}',
+          transition: TransitionType.inFromRight,
+        );
+      },
+      child: Container(
+        height: ScreenUtil().setHeight(330),
+        width: ScreenUtil().setWidth(250),
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            left: BorderSide(
+              width: 0.5,
+              color: Colors.black12,
+            ),
+          ),
+        ),
+        child: Column(
+          children: <Widget>[
+            Image.network(recommendList[index]['image']),
+            Text('￥${recommendList[index]['mallPrice']}'),
+            Text(
+              '￥${recommendList[index]['price']}',
+              style: TextStyle(
+                decoration: TextDecoration.lineThrough,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+}
+```
+
+
+### 楼层模块添加路由
+
+```
+Widget _goodsItems(Map goods, BuildContext context) {
+    return Container(
+      width: ScreenUtil().setWidth(375),
+      child: InkWell(
+        onTap: () {
+          debugPrint("楼层模块");
+          Application.router.navigateTo(
+            context,
+            Routers.detailPage + '?id=${goods['goodsId']}',
+            transition: TransitionType.inFromRight,
+          );
+        },
+        child: Image.network(goods['image']),
+      ),
+    );
+  }
+```
+
+
 
 
 
