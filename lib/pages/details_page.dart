@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/pages/details_page/details_tabbar.dart';
 import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
 import 'package:provide/provide.dart';
 
@@ -14,7 +15,15 @@ class DetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('商品详情页'),
+        title: Provide<DetailsGoodsProvide>(
+            builder: (context, child, detailsGoodsProvide) {
+          var goodInfo = detailsGoodsProvide.detailsGoods.data.goodInfo;
+          if (goodInfo != null) {
+            return Text(goodInfo.goodsName);
+          } else {
+            return Text('商品详情');
+          }
+        }),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -31,6 +40,7 @@ class DetailsPage extends StatelessWidget {
                 children: <Widget>[
                   DetailsTopArea(),
                   DetailsExplain(),
+                  DetailsTabBar(),
                 ],
               ),
             );
@@ -44,6 +54,7 @@ class DetailsPage extends StatelessWidget {
 
   Future _getGoodDetail(BuildContext context) async {
     Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
+    Provide.value<DetailsGoodsProvide>(context).changeTabState('left');
     return "完成加载";
   }
 }

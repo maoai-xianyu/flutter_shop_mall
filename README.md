@@ -5102,6 +5102,188 @@ class DetailsExplain extends StatelessWidget {
 
 ```
 
+## 第46节：详细页_自建TabBar Widget
+
+### 自定义tabBar状态管理
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/detailsGoodsModel.dart';
+import 'package:provide/provide.dart';
+import 'package:flutter_shop_mall/service/service_method.dart';
+import 'dart:convert';
+
+class DetailsGoodsProvide with ChangeNotifier {
+  DetailsGoodsModel detailsGoods;
+
+  bool isLeft = false;
+  bool isRight = false;
+
+  changeTabState(String type) {
+    if (type == 'left') {
+      isLeft = true;
+      isRight = false;
+    } else {
+      isLeft = false;
+      isRight = true;
+    }
+    notifyListeners();
+  }
+
+
+  getDetailsGoods(String goodsId) {
+    getDetailGoods(goodsId).then((value) {
+      debugPrint("----$value");
+      var data = json.decode(value.toString());
+      detailsGoods = DetailsGoodsModel.fromJson(data);
+      notifyListeners();
+    });
+  }
+}
+
+```
+
+### 自己定义 tabBar
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:provide/provide.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class DetailsTabBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Provide<DetailsGoodsProvide>(
+      builder: (context, child, detailsGoodsProvide) {
+        return Provide<DetailsGoodsProvide>(
+          builder: (context, child, detailsGoodsProvide) {
+            var isLeft = detailsGoodsProvide.isLeft;
+            var isRight = detailsGoodsProvide.isRight;
+            return Container(
+              margin: EdgeInsets.only(top: 10),
+              child: Row(
+                children: <Widget>[
+                  _leftTabBar(context, isLeft),
+                  _rightTabBar(context, isRight),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _leftTabBar(BuildContext context, bool isLeft) {
+    return _tabBar(context, '详情', 'left', isLeft);
+  }
+
+  Widget _rightTabBar(BuildContext context, bool isLeft) {
+    return _tabBar(context, '评论', 'right', isLeft);
+  }
+
+  Widget _tabBar(
+      BuildContext context, String desc, String type, bool changeState) {
+    return InkWell(
+      onTap: () {
+        debugPrint('点击tab');
+        Provide.value<DetailsGoodsProvide>(context).changeTabState(type);
+      },
+      child: Container(
+        alignment: Alignment.center,
+        width: ScreenUtil().setWidth(375),
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              color: changeState ? Colors.pink : Colors.black12,
+              width: 1,
+              style: BorderStyle.solid,
+            ),
+          ),
+        ),
+        child: Text(
+          desc,
+          style: TextStyle(
+            color: changeState ? Colors.pink : Colors.black,
+            fontSize: ScreenUtil().setSp(28),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+```
+
+### 商品详细页面
+
+设置选中状态，同时获取商品的页面
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/pages/details_page/details_tabbar.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:provide/provide.dart';
+
+import 'details_page/details_explain.dart';
+import 'details_page/details_top_area.dart';
+
+class DetailsPage extends StatelessWidget {
+  final String goodsId;
+
+  DetailsPage(this.goodsId);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Provide<DetailsGoodsProvide>(
+            builder: (context, child, detailsGoodsProvide) {
+          var goodInfo = detailsGoodsProvide.detailsGoods.data.goodInfo;
+          if (goodInfo != null) {
+            return Text(goodInfo.goodsName);
+          } else {
+            return Text('商品详情');
+          }
+        }),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: FutureBuilder(
+        future: _getGoodDetail(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+              child: ListView(
+                children: <Widget>[
+                  DetailsTopArea(),
+                  DetailsExplain(),
+                  DetailsTabBar(),
+                ],
+              ),
+            );
+          } else {
+            return Text('加载中.....');
+          }
+        },
+      ),
+    );
+  }
+
+  Future _getGoodDetail(BuildContext context) async {
+    Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
+    Provide.value<DetailsGoodsProvide>(context).changeTabState('left');
+    return "完成加载";
+  }
+}
+
+```
+
 
 
 ## 后端接口API文档

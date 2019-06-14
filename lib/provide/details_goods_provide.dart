@@ -7,6 +7,21 @@ import 'dart:convert';
 class DetailsGoodsProvide with ChangeNotifier {
   DetailsGoodsModel detailsGoods;
 
+  bool isLeft = false;
+  bool isRight = false;
+
+  changeTabState(String type) {
+    if (type == 'left') {
+      isLeft = true;
+      isRight = false;
+    } else {
+      isLeft = false;
+      isRight = true;
+    }
+    notifyListeners();
+  }
+
+
   getDetailsGoods(String goodsId) {
     getDetailGoods(goodsId).then((value) {
       debugPrint("----$value");
