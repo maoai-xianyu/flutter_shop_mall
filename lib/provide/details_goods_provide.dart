@@ -22,8 +22,8 @@ class DetailsGoodsProvide with ChangeNotifier {
   }
 
 
-  getDetailsGoods(String goodsId) {
-    getDetailGoods(goodsId).then((value) {
+  getDetailsGoods(String goodsId) async {
+    await getDetailGoods(goodsId).then((value) {
       debugPrint("----$value");
       var data = json.decode(value.toString());
       detailsGoods = DetailsGoodsModel.fromJson(data);
