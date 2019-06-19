@@ -3,6 +3,7 @@ import 'package:flutter_shop_mall/pages/details_page/details_tabbar.dart';
 import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
 import 'package:provide/provide.dart';
 
+import 'details_page/details_bottom.dart';
 import 'details_page/details_explain.dart';
 import 'details_page/details_top_area.dart';
 import 'details_page/details_web.dart';
@@ -36,15 +37,24 @@ class DetailsPage extends StatelessWidget {
         future: _getGoodDetail(context),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return Container(
-              child: ListView(
-                children: <Widget>[
-                  DetailsTopArea(),
-                  DetailsExplain(),
-                  DetailsTabBar(),
-                  DetailsWeb(),
-                ],
-              ),
+            return Stack(
+              children: <Widget>[
+                Container(
+                  child: ListView(
+                    children: <Widget>[
+                      DetailsTopArea(),
+                      DetailsExplain(),
+                      DetailsTabBar(),
+                      DetailsWeb(),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: DetailsBottom(),
+                )
+              ],
             );
           } else {
             return Text('加载中.....');
@@ -55,7 +65,7 @@ class DetailsPage extends StatelessWidget {
   }
 
   Future _getGoodDetail(BuildContext context) async {
-    Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
+    await Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
     Provide.value<DetailsGoodsProvide>(context).changeTabState('left');
     return "完成加载";
   }

@@ -5527,6 +5527,164 @@ class DetailsWeb extends StatelessWidget {
 ```
 
 
+## 第49节：详细页页_Stack作底部操作栏
+
+
+### Stack组件介绍
+
+Stack组件是层叠组件，里边的每一个子控件都是定位或者不定位，定位的子控件是被Positioned Widget进行包裹的。
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/pages/details_page/details_tabbar.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:provide/provide.dart';
+
+import 'details_page/details_bottom.dart';
+import 'details_page/details_explain.dart';
+import 'details_page/details_top_area.dart';
+import 'details_page/details_web.dart';
+
+class DetailsPage extends StatelessWidget {
+  final String goodsId;
+
+  DetailsPage(this.goodsId);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Provide<DetailsGoodsProvide>(
+            builder: (context, child, detailsGoodsProvide) {
+          var goodInfo = detailsGoodsProvide.detailsGoods.data.goodInfo;
+          if (goodInfo != null) {
+            return Text(goodInfo.goodsName);
+          } else {
+            return Text('商品详情');
+          }
+        }),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: FutureBuilder(
+        future: _getGoodDetail(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Stack(
+              children: <Widget>[
+                Container(
+                  child: ListView(
+                    children: <Widget>[
+                      DetailsTopArea(),
+                      DetailsExplain(),
+                      DetailsTabBar(),
+                      DetailsWeb(),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: DetailsBottom(),
+                )
+              ],
+            );
+          } else {
+            return Text('加载中.....');
+          }
+        },
+      ),
+    );
+  }
+
+  Future _getGoodDetail(BuildContext context) async {
+    await Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
+    Provide.value<DetailsGoodsProvide>(context).changeTabState('left');
+    return "完成加载";
+  }
+}
+
+
+```
+    
+### 底部标签添加
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class DetailsBottom extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: ScreenUtil().setWidth(750),
+      height: ScreenUtil().setHeight(100),
+      child: Row(
+        children: <Widget>[
+          InkWell(
+            onTap: () {
+              debugPrint('点击购物车');
+            },
+            child: Container(
+              height: ScreenUtil().setHeight(100),
+              width: ScreenUtil().setHeight(110),
+              color: Colors.white,
+              child: Icon(
+                Icons.shopping_cart,
+                size: 30,
+                color: Colors.pink,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              debugPrint('加入购物车');
+            },
+            child: Container(
+              height: ScreenUtil().setHeight(100),
+              width: ScreenUtil().setHeight(320),
+              color: Colors.green,
+              alignment: Alignment(0, 0),
+              child: Text(
+                '加入购物车',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ScreenUtil().setSp(30),
+                ),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              debugPrint('立即购买');
+            },
+            child: Container(
+              height: ScreenUtil().setHeight(100),
+              width: ScreenUtil().setHeight(320),
+              color: Colors.red,
+              alignment: Alignment(0, 0),
+              child: Text(
+                '立即购买',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ScreenUtil().setSp(30),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+```
+
+
 
 ## 后端接口API文档
 
