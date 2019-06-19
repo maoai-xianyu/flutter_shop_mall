@@ -45,18 +45,16 @@ class DetailsWeb extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  height: ScreenUtil().setWidth(1000),
+                  height: ScreenUtil().setHeight(140),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Colors.black12,
                   ),
                   width: ScreenUtil().setWidth(750),
-                  child: Flexible(
-                    child: ListView.builder(
-                      itemCount: goodsComment.length,
-                      itemBuilder: (context, index) {
-                        return _showComments(goodsComment[index]);
-                      },
-                    ),
+                  child: ListView.builder(
+                    itemCount: goodsComment.length,
+                    itemBuilder: (context, index) {
+                      return _showComments(goodsComment[index]);
+                    },
                   ),
                 ),
                 Image.network(advertesPicture.pICTUREADDRESS),
@@ -82,21 +80,27 @@ class DetailsWeb extends StatelessWidget {
 
   Widget _showComments(GoodComments comment) {
     return Container(
-      padding: EdgeInsets.only(left: 10, top: 20),
+      padding: EdgeInsets.only(left: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            comment.userName,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: ScreenUtil().setSp(24),
+          Container(
+            padding: EdgeInsets.only(top: 20),
+            child: Text(
+              comment.userName,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: ScreenUtil().setSp(24),
+              ),
             ),
           ),
-          Text(
-            comment.comments,
-            style: TextStyle(
-              color: Colors.black26,
-              fontSize: ScreenUtil().setSp(24),
+          Container(
+            child: Text(
+              comment.comments,
+              style: TextStyle(
+                color: Colors.black26,
+                fontSize: ScreenUtil().setSp(24),
+              ),
             ),
           ),
           Text(

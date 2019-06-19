@@ -5286,7 +5286,7 @@ class DetailsPage extends StatelessWidget {
 
 ## 第47节：详细页_Flutter_html插件的使用
 
-## flutter_html介绍 [flutter_html](https://github.com/Sub6Resources/flutter_html)
+### flutter_html介绍 [flutter_html](https://github.com/Sub6Resources/flutter_html)
 
 flutter_html是一个可以解析静态html标签的Flutter Widget，现在支持超过70种不同的标签。
 
@@ -5330,7 +5330,7 @@ Html(
 )
 
 ```
-## 网页
+### 网页
 
 ```
 import 'package:flutter/material.dart';
@@ -5356,7 +5356,7 @@ class DetailsWeb extends StatelessWidget {
 
 ```
 
-## 解决报错  The getter 'data' was called on null.
+### 解决报错  The getter 'data' was called on null.  但是目前还是没有解决问题。
 
 ```
 import 'package:flutter/material.dart';
@@ -5397,7 +5397,9 @@ class DetailsGoodsProvide with ChangeNotifier {
 
 ## 第48节：详细页_详情和评论切换效果制作
 
-### 现在存在问题，就是在colum 种放listview 有问题
+### 现在存在问题，就是在colum 种放listview 有问题,
+
+如果不写固定高度 height: ScreenUtil().setHeight(140) 那么就会报错
 
 ```
 import 'package:flutter/material.dart';
@@ -5447,18 +5449,16 @@ class DetailsWeb extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  height: ScreenUtil().setWidth(1000),
+                  height: ScreenUtil().setHeight(140),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Colors.black12,
                   ),
                   width: ScreenUtil().setWidth(750),
-                  child: Flexible(
-                    child: ListView.builder(
-                      itemCount: goodsComment.length,
-                      itemBuilder: (context, index) {
-                        return _showComments(goodsComment[index]);
-                      },
-                    ),
+                  child: ListView.builder(
+                    itemCount: goodsComment.length,
+                    itemBuilder: (context, index) {
+                      return _showComments(goodsComment[index]);
+                    },
                   ),
                 ),
                 Image.network(advertesPicture.pICTUREADDRESS),
@@ -5484,21 +5484,27 @@ class DetailsWeb extends StatelessWidget {
 
   Widget _showComments(GoodComments comment) {
     return Container(
-      padding: EdgeInsets.only(left: 10, top: 20),
+      padding: EdgeInsets.only(left: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            comment.userName,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: ScreenUtil().setSp(24),
+          Container(
+            padding: EdgeInsets.only(top: 20),
+            child: Text(
+              comment.userName,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: ScreenUtil().setSp(24),
+              ),
             ),
           ),
-          Text(
-            comment.comments,
-            style: TextStyle(
-              color: Colors.black26,
-              fontSize: ScreenUtil().setSp(24),
+          Container(
+            child: Text(
+              comment.comments,
+              style: TextStyle(
+                color: Colors.black26,
+                fontSize: ScreenUtil().setSp(24),
+              ),
             ),
           ),
           Text(
@@ -5516,6 +5522,7 @@ class DetailsWeb extends StatelessWidget {
     );
   }
 }
+
 
 ```
 
