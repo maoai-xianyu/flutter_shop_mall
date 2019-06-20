@@ -5684,7 +5684,120 @@ class DetailsBottom extends StatelessWidget {
 
 ```
 
+## 第50节:持久化_shared_preferences基础1
 
+* sqflite
+* shared_preferences
+* file
+
+### shared_preferences  [shared_preferences](https://github.com/flutter/plugins/tree/master/packages/shared_preferences)
+
+> https://github.com/flutter/plugins/tree/master/packages/shared_preferences
+
+是一个Flutter官方出的插件，它的主要作用就是可以key-value的形式来进行APP可客户端的持久化。
+
+
+```
+import 'package:flutter/material.dart';
+import 'package:provide/provide.dart';
+import '../provide/counter_provide.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class CartPage extends StatefulWidget {
+  @override
+  _CartPageState createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  List<String> listDatas = [];
+
+  @override
+  Widget build(BuildContext context) {
+    showGoodsNames();
+    return Scaffold(
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: ScreenUtil().setHeight(500),
+              child: ListView.builder(
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(listDatas[index]),
+                  );
+                },
+                itemCount: listDatas.length,
+              ),
+            ),
+            SizedBox(
+              height: ScreenUtil().setHeight(20),
+            ),
+            Row(
+              children: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    addGoodsName();
+                  },
+                  child: Text('添加'),
+                ),
+                OutlineButton(
+                  onPressed: () {
+                    clearGoodsNames();
+                  },
+                  child: Text('删除'),
+                ),
+                RaisedButton(
+                  onPressed: () {
+                    addGoodsName();
+                  },
+                  child: Text('添加1'),
+                ),
+                MaterialButton(
+                  onPressed: () {
+                    clearGoodsNames();
+                  },
+                  child: Text('删除2'),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void addGoodsName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String temp = 'this is codingtk coding';
+    listDatas.add(temp);
+    prefs.setStringList('cart_goods_name', listDatas);
+    showGoodsNames();
+  }
+
+  void showGoodsNames() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var stringList = prefs.getStringList('cart_goods_name');
+    if (stringList != null) {
+      setState(() {
+        listDatas = stringList;
+      });
+    }
+  }
+
+  void clearGoodsNames() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // 删除所有
+    //prefs.clear();
+    // 删除指定所有
+    prefs.remove('cart_goods_name');
+    setState(() {
+      listDatas = [];
+    });
+  }
+}
+
+```
 
 ## 后端接口API文档
 
