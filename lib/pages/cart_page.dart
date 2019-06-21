@@ -1,98 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
 import 'package:provide/provide.dart';
-import '../provide/counter_provide.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class CartPage extends StatefulWidget {
-  @override
-  _CartPageState createState() => _CartPageState();
-}
-
-class _CartPageState extends State<CartPage> {
-  List<String> listDatas = [];
-
+class CartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    showGoodsNames();
     return Scaffold(
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: ScreenUtil().setHeight(500),
-              child: ListView.builder(
+      appBar: AppBar(
+        title: Text('商品购物车'),
+      ),
+      body: FutureBuilder(
+        future: _getCartGoods(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            debugPrint('购物车 有数据');
+            List<CartInfoModel> listCartGoods =
+                Provide.value<CartProvide>(context).cartInfoList;
+            if (listCartGoods != null && listCartGoods.length > 0) {
+              debugPrint('购物车 有数据 不为空');
+              return ListView.builder(
+                itemCount: listCartGoods.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(listDatas[index]),
+                    title: Text(listCartGoods[index].goodsName),
                   );
                 },
-                itemCount: listDatas.length,
+              );
+            } else {
+              debugPrint('购物车 有数据 为空');
+              return Center(
+                child: Text(
+                  '当前购物车为空',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(30),
+                    color: Colors.black12,
+                  ),
+                ),
+              );
+            }
+          } else {
+            debugPrint('购物车 没有数据');
+            return Center(
+              child: Text(
+                '当前购物车为空',
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(30),
+                  color: Colors.black12,
+                ),
               ),
-            ),
-            SizedBox(
-              height: ScreenUtil().setHeight(20),
-            ),
-            Row(
-              children: <Widget>[
-                FlatButton(
-                  onPressed: () {
-                    addGoodsName();
-                  },
-                  child: Text('添加'),
-                ),
-                OutlineButton(
-                  onPressed: () {
-                    clearGoodsNames();
-                  },
-                  child: Text('删除'),
-                ),
-                RaisedButton(
-                  onPressed: () {
-                    addGoodsName();
-                  },
-                  child: Text('添加1'),
-                ),
-                MaterialButton(
-                  onPressed: () {
-                    clearGoodsNames();
-                  },
-                  child: Text('删除2'),
-                ),
-              ],
-            )
-          ],
-        ),
+            );
+          }
+        },
       ),
     );
   }
 
-  void addGoodsName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String temp = 'this is codingtk coding';
-    listDatas.add(temp);
-    prefs.setStringList('cart_goods_name', listDatas);
-    showGoodsNames();
-  }
-
-  void showGoodsNames() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var stringList = prefs.getStringList('cart_goods_name');
-    if (stringList != null) {
-      setState(() {
-        listDatas = stringList;
-      });
-    }
-  }
-
-  void clearGoodsNames() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // 删除所有
-    //prefs.clear();
-    // 删除指定所有
-    prefs.remove('cart_goods_name');
-    setState(() {
-      listDatas = [];
-    });
+  Future<String> _getCartGoods(BuildContext context) async {
+    await Provide.value<CartProvide>(context).getCartInfoGoods();
+    return "完成加载";
   }
 }

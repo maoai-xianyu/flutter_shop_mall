@@ -64,7 +64,7 @@ class DetailsPage extends StatelessWidget {
     );
   }
 
-  Future _getGoodDetail(BuildContext context) async {
+  Future<String> _getGoodDetail(BuildContext context) async {
     await Provide.value<DetailsGoodsProvide>(context).getDetailsGoods(goodsId);
     Provide.value<DetailsGoodsProvide>(context).changeTabState('left');
     return "完成加载";

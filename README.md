@@ -6116,6 +6116,75 @@ class CartProvide extends ChangeNotifier {
 
 ```
 
+## 第53节：购物车_大体结构布局
+
+### 购物车页面获取数据
+
+```
+
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:provide/provide.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品购物车'),
+      ),
+      body: FutureBuilder(
+        future: _getCartGoods(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<CartInfoModel> listCartGoods =
+                Provide.value<CartProvide>(context).cartInfoList;
+            if (listCartGoods != null && listCartGoods.length > 0) {
+              return ListView.builder(
+                itemCount: listCartGoods.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(listCartGoods[index].goodsName),
+                  );
+                },
+              );
+            } else {
+              return Center(
+                child: Text(
+                  '当前购物车为空',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(30),
+                    color: Colors.black12,
+                  ),
+                ),
+              );
+            }
+          } else {
+            return Center(
+              child: Text(
+                '当前购物车为空',
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(30),
+                  color: Colors.black12,
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<String> _getCartGoods(BuildContext context) async {
+    await Provide.value<CartProvide>(context).getCartInfoGoods();
+    return "完成加载";
+  }
+}
+
+```
+
 ## 后端接口API文档
 
 
