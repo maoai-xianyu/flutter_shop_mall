@@ -7,7 +7,7 @@ class CartProvide extends ChangeNotifier {
   String cartGoodsStr = "[]";
   List<CartInfoModel> cartInfoList = [];
 
-  void save(String goodsId, String goodsName, int count, double presentPrice,
+  void save(String goodsId, String goodsName, int count, double presentPrice,double oriPrice,
       String images) async {
     // 初始化SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -52,6 +52,7 @@ class CartProvide extends ChangeNotifier {
         'goodsName': goodsName,
         'count': count,
         'price': presentPrice,
+        'oriPrice': oriPrice,
         'images': images
       };
       tampList.add(newGoods);
