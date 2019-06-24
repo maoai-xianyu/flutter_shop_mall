@@ -6367,6 +6367,254 @@ class CartPage extends StatelessWidget {
 
 ```
 
+## 第55节:购物车_制作底部结算栏的UI
+
+
+### 购物车结算页面定义
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class CartBottom extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: ScreenUtil().setWidth(750),
+      padding: EdgeInsets.all(5.0),
+      color: Colors.white,
+      child: Row(
+        children: <Widget>[
+          _checkBoxAll(),
+          _allPrice(),
+          _allPayAll(),
+          //_goPayAll(),
+        ],
+      ),
+    );
+  }
+
+  // 全选
+  Widget _checkBoxAll() {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Checkbox(
+            onChanged: (value) {
+              debugPrint('点击全选');
+            },
+            value: true,
+            activeColor: Colors.pink,
+            checkColor: Colors.white,
+          ),
+          Text(
+            '全选',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: ScreenUtil().setSp(24),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 价格
+  Widget _allPrice() {
+    return Container(
+      width: ScreenUtil().setWidth(400),
+      alignment: Alignment.centerRight,
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '合计：',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(24),
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '￥1992',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(30),
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '满10元免配送费，预购免配送费',
+              style: TextStyle(
+                fontSize: ScreenUtil().setSp(22),
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 结算
+  Widget _allPayAll() {
+    return Container(
+      width: ScreenUtil().setWidth(150),
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(left: 10),
+      child: MaterialButton(
+        onPressed: () {},
+        child: Text(
+          '结算(6)',
+        ),
+        color: Colors.red,
+        textColor: Colors.white,
+      ),
+    );
+  }
+
+  // 或者自己做button
+  Widget _goPayAll() {
+    return Container(
+      width: ScreenUtil().setWidth(150),
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(left: 10),
+      child: InkWell(
+        onTap: () {
+          debugPrint('自己画button');
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.all(
+              Radius.circular(3),
+            ),
+          ),
+          child: Text(
+            '结算(6)',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+```
+
+### 页面调用
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:provide/provide.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'package:flutter_shop_mall/pages/cart_page/cart_item.dart';
+
+class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品购物车'),
+      ),
+      body: FutureBuilder(
+        future: _getCartGoods(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            debugPrint('购物车 有数据');
+            List<CartInfoModel> listCartGoods =
+                Provide.value<CartProvide>(context).cartInfoList;
+            if (listCartGoods != null && listCartGoods.length > 0) {
+              debugPrint('购物车 有数据 不为空');
+              return Stack(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.black12,
+                              width: 1,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                        ),
+                        height: ScreenUtil().setHeight(1),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: ListView.builder(
+                          itemCount: listCartGoods.length,
+                          itemBuilder: (context, index) {
+                            return CartItem(listCartGoods[index]);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: CartBottom(),
+                  ),
+                ],
+              );
+            } else {
+              debugPrint('购物车 有数据 为空');
+              return Center(
+                child: Text(
+                  '当前购物车为空',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(30),
+                    color: Colors.black12,
+                  ),
+                ),
+              );
+            }
+          } else {
+            debugPrint('购物车 没有数据');
+            return Center(
+              child: Text(
+                '当前购物车为空',
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(30),
+                  color: Colors.black12,
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<String> _getCartGoods(BuildContext context) async {
+    await Provide.value<CartProvide>(context).getCartInfoGoods();
+    return "完成加载";
+  }
+}
+
+```
+
 ## 后端接口API文档
 
 

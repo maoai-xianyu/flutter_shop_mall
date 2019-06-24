@@ -4,7 +4,9 @@ import 'package:flutter_shop_mall/provide/cart_provide.dart';
 import 'package:provide/provide.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'cart_item_page.dart';
+import 'package:flutter_shop_mall/pages/cart_page/cart_item.dart';
+
+import 'cart_page/cart_bottom.dart';
 
 class CartPage extends StatelessWidget {
   @override
@@ -22,29 +24,38 @@ class CartPage extends StatelessWidget {
                 Provide.value<CartProvide>(context).cartInfoList;
             if (listCartGoods != null && listCartGoods.length > 0) {
               debugPrint('购物车 有数据 不为空');
-              return Column(
+              return Stack(
                 children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Colors.black12,
-                          width: 1,
-                          style: BorderStyle.solid,
+                  Column(
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.black12,
+                              width: 1,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                        ),
+                        height: ScreenUtil().setHeight(1),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: ListView.builder(
+                          itemCount: listCartGoods.length,
+                          itemBuilder: (context, index) {
+                            return CartItem(listCartGoods[index]);
+                          },
                         ),
                       ),
-                    ),
-                    height: ScreenUtil().setHeight(1),
+                    ],
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: ListView.builder(
-                      itemCount: listCartGoods.length,
-                      itemBuilder: (context, index) {
-                        return CartItemPage(listCartGoods[index]);
-                      },
-                    ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: CartBottom(),
                   ),
                 ],
               );

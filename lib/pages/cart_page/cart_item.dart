@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_shop_mall/model/cartInfoModel.dart';
 
-class CartItemPage extends StatelessWidget {
+class CartItem extends StatelessWidget {
   CartInfoModel cartInfoModel;
 
-  CartItemPage(this.cartInfoModel);
+  CartItem(this.cartInfoModel);
 
   @override
   Widget build(BuildContext context) {
