@@ -26,7 +26,7 @@ class CartItem extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          _checkBoxCartGoods(),
+          _checkBoxCartGoods(context),
           _imageCartGoods(),
           _cartGoodsNameCount(),
           _cartGoodsPrice(),
@@ -36,10 +36,10 @@ class CartItem extends StatelessWidget {
   }
 
   // 复选框
-  Widget _checkBoxCartGoods() {
+  Widget _checkBoxCartGoods(BuildContext context) {
     return Container(
       child: Checkbox(
-        value: true,
+        value: cartInfoModel.isCheck,
         onChanged: (value) {
           debugPrint('点击$value');
         },

@@ -6742,6 +6742,50 @@ class CartCount extends StatelessWidget {
   }
 ```
 
+
+## 第57节：购物车_在Model中增加选中字段
+
+
+### 修改购物车的实力类
+
+```
+class CartInfoModel {
+  String goodsId;
+  String goodsName;
+  int count;
+  double price;
+  double oriPrice;
+  String images;
+  bool isCheck;
+
+  CartInfoModel(
+      {this.goodsId, this.goodsName, this.count, this.price,this.oriPrice, this.images,this.isCheck});
+
+  CartInfoModel.fromJson(Map<String, dynamic> json) {
+    goodsId = json['goodsId'];
+    goodsName = json['goodsName'];
+    count = json['count'];
+    price = json['price'];
+    oriPrice = json['oriPrice'];
+    images = json['images'];
+    isCheck = json['isCheck'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['goodsId'] = this.goodsId;
+    data['goodsName'] = this.goodsName;
+    data['count'] = this.count;
+    data['price'] = this.price;
+    data['oriPrice'] = this.oriPrice;
+    data['images'] = this.images;
+    data['isCheck'] = this.isCheck;
+    return data;
+  }
+}
+
+```
+
 ## 后端接口API文档
 
 

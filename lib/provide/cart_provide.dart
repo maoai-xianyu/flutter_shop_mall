@@ -53,7 +53,8 @@ class CartProvide extends ChangeNotifier {
         'count': count,
         'price': presentPrice,
         'oriPrice': oriPrice,
-        'images': images
+        'images': images,
+        'isCheck': true
       };
       tampList.add(newGoods);
       cartInfoList.add(CartInfoModel.fromJson(newGoods));
