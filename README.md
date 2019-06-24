@@ -6745,7 +6745,6 @@ class CartCount extends StatelessWidget {
 
 ## 第57节：购物车_在Model中增加选中字段
 
-
 ### 修改购物车的实力类
 
 ```
