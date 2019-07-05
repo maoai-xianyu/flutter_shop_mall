@@ -6785,6 +6785,296 @@ class CartInfoModel {
 
 ```
 
+## 第58节：购物车_删除单个商品功能制作
+
+
+### 添加删除状态管理
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
+class CartProvide extends ChangeNotifier {
+  String cartGoodsStr = "[]";
+  List<CartInfoModel> cartInfoList = [];
+
+  void save(String goodsId, String goodsName, int count, double presentPrice,
+      double oriPrice, String images) async {
+    // 初始化SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // 获取数据
+    cartGoodsStr = prefs.getString('cartInfo');
+    debugPrint('cartGoodsStr 值  $cartGoodsStr');
+    // 判断cartString是否为空，为空说明是第一次添加，或者被key被清除了。
+    // 如果有值进行decode操作
+    var temp = cartGoodsStr == null ? [] : json.decode(cartGoodsStr.toString());
+    List<Map> tampList = (temp as List).cast();
+    // 如果数据不为空，那么需要给 cartInfoList 添加数据
+    if (tampList != null && tampList.length > 0) {
+      tampList.forEach((item) {
+        cartInfoList.add(new CartInfoModel.fromJson(item));
+      });
+    }
+
+    // 判断是否存在当前商品
+    bool isHaveThisGoods = false;
+
+    // 用于进行循环的索引使用
+    int ival = 0;
+    // 进行循环，找出是否已经存在该商品
+    tampList.forEach((item) {
+      debugPrint('ival 前 $ival');
+      // 如果存在，数量进行+1操作
+      if (item['goodsId'] == goodsId) {
+        debugPrint('有一样的数据，+1');
+        tampList[ival]['count'] = item['count'] + 1;
+        cartInfoList[ival].count++;
+        isHaveThisGoods = true;
+      }
+      ival++;
+    });
+
+    debugPrint('ival 后 $ival');
+
+    //  如果没有，进行增加
+    if (!isHaveThisGoods) {
+      Map<String, dynamic> newGoods = {
+        'goodsId': goodsId,
+        'goodsName': goodsName,
+        'count': count,
+        'price': presentPrice,
+        'oriPrice': oriPrice,
+        'images': images,
+        'isCheck': true
+      };
+      tampList.add(newGoods);
+      cartInfoList.add(CartInfoModel.fromJson(newGoods));
+    }
+
+    //把字符串进行encode操作，
+    cartGoodsStr = json.encode(tampList).toString();
+    debugPrint('持久化数据 字符串 $cartGoodsStr');
+    debugPrint('持久化数据 列表 $cartInfoList');
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+  }
+
+  // 清空
+  void remove() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //prefs.clear();//清空键值对
+    prefs.remove('cartInfo');
+    // 置空数据
+    cartInfoList = [];
+    debugPrint('清空完成-----------------');
+    notifyListeners();
+  }
+
+  // 得到购物车中的商品
+  getCartInfoGoods() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    //把cartList进行初始化，防止数据混乱
+    cartInfoList = [];
+
+    // 判断得到的字符串是否有值，如果不判断会报错
+    if (cartInfoStr == null) {
+      cartInfoList = [];
+    } else {
+      var cartInfoJson = json.decode(cartInfoStr.toString());
+      List<Map> tampList = (cartInfoJson as List).cast();
+      tampList.forEach((item) {
+        cartInfoList.add(new CartInfoModel.fromJson(item));
+      });
+    }
+    notifyListeners();
+  }
+
+  // 删除购物车数据
+  deleteCartInfoGoods(String goodsId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+
+    // 用于进行循环的索引使用
+    int ival = 0;
+    int delIndex = 0;
+    // 进行循环，找出是否已经存在该商品
+    tampList.forEach((item) {
+      // 如果存在，数量进行+1操作
+      if (item['goodsId'] == goodsId) {
+        delIndex = ival;
+      }
+      ival++;
+    });
+    tampList.removeAt(delIndex);
+    cartGoodsStr = json.encode(tampList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
+  }
+}
+
+```
+
+### 删除调用
+
+```
+// 商品价钱
+  Widget _cartGoodsPrice(BuildContext context) {
+    return Container(
+      width: ScreenUtil().setWidth(150),
+      child: Column(
+        children: <Widget>[
+          Text(
+            '￥${cartInfoModel.price}',
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(24),
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            '￥${cartInfoModel.oriPrice}',
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(24),
+              color: Colors.black26,
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              debugPrint('删除数据');
+              Provide.value<CartProvide>(context)
+                  .deleteCartInfoGoods(cartInfoModel.goodsId);
+            },
+            child: Icon(
+              Icons.delete,
+              color: Colors.black12,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+```
+
+### 删除购物车的商品，需要更新购物车
+```
+
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:provide/provide.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_shop_mall/pages/cart_page/cart_item.dart';
+
+import 'cart_page/cart_bottom.dart';
+
+class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品购物车'),
+      ),
+      body: FutureBuilder(
+        future: _getCartGoods(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            debugPrint('购物车 有数据');
+            List<CartInfoModel> listCartGoods =
+                Provide.value<CartProvide>(context).cartInfoList;
+            if (listCartGoods != null && listCartGoods.length > 0) {
+              debugPrint('购物车 有数据 不为空');
+              return Stack(
+                children: <Widget>[
+                  Provide<CartProvide>(
+                    builder: (context, child, cartProvide) {
+                      listCartGoods =
+                          Provide.value<CartProvide>(context).cartInfoList;
+                      if (listCartGoods != null && listCartGoods.length > 0) {
+                        return Column(
+                          children: <Widget>[
+                            Container(
+                              margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Colors.black12,
+                                    width: 1,
+                                    style: BorderStyle.solid,
+                                  ),
+                                ),
+                              ),
+                              height: ScreenUtil().setHeight(1),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: ListView.builder(
+                                itemCount: listCartGoods.length,
+                                itemBuilder: (context, index) {
+                                  return CartItem(listCartGoods[index]);
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Center(
+                          child: Text(
+                            '当前购物车为空',
+                            style: TextStyle(
+                              fontSize: ScreenUtil().setSp(30),
+                              color: Colors.black12,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: CartBottom(),
+                  ),
+                ],
+              );
+            } else {
+              debugPrint('购物车 有数据 为空');
+              return Center(
+                child: Text(
+                  '当前购物车为空',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(30),
+                    color: Colors.black12,
+                  ),
+                ),
+              );
+            }
+          } else {
+            debugPrint('购物车 没有数据');
+            return Center(
+              child: Text(
+                '当前购物车为空',
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(30),
+                  color: Colors.black12,
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<String> _getCartGoods(BuildContext context) async {
+    await Provide.value<CartProvide>(context).getCartInfoGoods();
+    return "完成加载";
+  }
+}
+
+```
 ## 后端接口API文档
 
 

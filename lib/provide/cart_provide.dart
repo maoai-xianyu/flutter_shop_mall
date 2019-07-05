@@ -7,8 +7,8 @@ class CartProvide extends ChangeNotifier {
   String cartGoodsStr = "[]";
   List<CartInfoModel> cartInfoList = [];
 
-  void save(String goodsId, String goodsName, int count, double presentPrice,double oriPrice,
-      String images) async {
+  void save(String goodsId, String goodsName, int count, double presentPrice,
+      double oriPrice, String images) async {
     // 初始化SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // 获取数据
@@ -67,6 +67,7 @@ class CartProvide extends ChangeNotifier {
     prefs.setString('cartInfo', cartGoodsStr); //进行持久化
   }
 
+  // 清空
   void remove() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     //prefs.clear();//清空键值对
@@ -95,5 +96,29 @@ class CartProvide extends ChangeNotifier {
       });
     }
     notifyListeners();
+  }
+
+  // 删除购物车数据
+  deleteCartInfoGoods(String goodsId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+
+    // 用于进行循环的索引使用
+    int ival = 0;
+    int delIndex = 0;
+    // 进行循环，找出是否已经存在该商品
+    tampList.forEach((item) {
+      // 如果存在，数量进行+1操作
+      if (item['goodsId'] == goodsId) {
+        delIndex = ival;
+      }
+      ival++;
+    });
+    tampList.removeAt(delIndex);
+    cartGoodsStr = json.encode(tampList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
   }
 }

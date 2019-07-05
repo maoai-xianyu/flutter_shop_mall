@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:provide/provide.dart';
 
 import 'cart_count.dart';
 
@@ -29,7 +31,7 @@ class CartItem extends StatelessWidget {
           _checkBoxCartGoods(context),
           _imageCartGoods(),
           _cartGoodsNameCount(),
-          _cartGoodsPrice(),
+          _cartGoodsPrice(context),
         ],
       ),
     );
@@ -86,7 +88,7 @@ class CartItem extends StatelessWidget {
   }
 
   // 商品价钱
-  Widget _cartGoodsPrice() {
+  Widget _cartGoodsPrice(BuildContext context) {
     return Container(
       width: ScreenUtil().setWidth(150),
       child: Column(
@@ -107,7 +109,11 @@ class CartItem extends StatelessWidget {
             ),
           ),
           InkWell(
-            onTap: () {},
+            onTap: () {
+              debugPrint('删除数据');
+              Provide.value<CartProvide>(context)
+                  .deleteCartInfoGoods(cartInfoModel.goodsId);
+            },
             child: Icon(
               Icons.delete,
               color: Colors.black12,
