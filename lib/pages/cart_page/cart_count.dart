@@ -81,7 +81,7 @@ class CartCount extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
       ),
-      child: Text('12'),
+      child: Text('1'),
     );
   }
 }

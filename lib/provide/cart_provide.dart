@@ -6,6 +6,8 @@ import 'dart:convert';
 class CartProvide extends ChangeNotifier {
   String cartGoodsStr = "[]";
   List<CartInfoModel> cartInfoList = [];
+  double allPrice = 0;
+  int allGoodsCount = 0;
 
   void save(String goodsId, String goodsName, int count, double presentPrice,
       double oriPrice, String images) async {
@@ -89,9 +91,15 @@ class CartProvide extends ChangeNotifier {
     if (cartInfoStr == null) {
       cartInfoList = [];
     } else {
+      allPrice = 0;
+      allGoodsCount = 0;
       var cartInfoJson = json.decode(cartInfoStr.toString());
       List<Map> tampList = (cartInfoJson as List).cast();
       tampList.forEach((item) {
+        if(item['isCheck']){
+          allPrice+= item['count']*item['price'];
+          allGoodsCount += item['count'];
+        }
         cartInfoList.add(new CartInfoModel.fromJson(item));
       });
     }

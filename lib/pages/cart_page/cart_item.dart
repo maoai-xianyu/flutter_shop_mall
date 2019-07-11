@@ -44,6 +44,7 @@ class CartItem extends StatelessWidget {
         value: cartInfoModel.isCheck,
         onChanged: (value) {
           debugPrint('点击$value');
+          cartInfoModel.isCheck = value;
         },
         checkColor: Colors.white,
         activeColor: Colors.pink,
@@ -111,8 +112,9 @@ class CartItem extends StatelessWidget {
           InkWell(
             onTap: () {
               debugPrint('删除数据');
-              Provide.value<CartProvide>(context)
-                  .deleteCartInfoGoods(cartInfoModel.goodsId);
+              showDeleteDialog(context);
+              /*Provide.value<CartProvide>(context)
+                  .deleteCartInfoGoods(cartInfoModel.goodsId);*/
             },
             child: Icon(
               Icons.delete,
@@ -122,6 +124,34 @@ class CartItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void showDeleteDialog(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('删除提示'),
+          content: Text('您确定要删除“${cartInfoModel.goodsName}”这个商品么？'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('确定'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Provide.value<CartProvide>(context).deleteCartInfoGoods(cartInfoModel.goodsId);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
