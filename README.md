@@ -7372,6 +7372,625 @@ class CartBottom extends StatelessWidget {
 
 ```
 
+## 第60节：购物车_商品选中功能制作
+
+### 商品的选择按钮和全选按钮的状态管理
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
+class CartProvide extends ChangeNotifier {
+  String cartGoodsStr = "[]";
+  List<CartInfoModel> cartInfoList = [];
+  double allPrice = 0;
+  int allGoodsCount = 0;
+  bool isAllChecked = true; // 全选，默认是true
+
+  void save(String goodsId, String goodsName, int count, double presentPrice,
+      double oriPrice, String images) async {
+    // 初始化SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // 获取数据
+    cartGoodsStr = prefs.getString('cartInfo');
+    debugPrint('cartGoodsStr 值  $cartGoodsStr');
+    // 判断cartString是否为空，为空说明是第一次添加，或者被key被清除了。
+    // 如果有值进行decode操作
+    var temp = cartGoodsStr == null ? [] : json.decode(cartGoodsStr.toString());
+    List<Map> tampList = (temp as List).cast();
+    // 如果数据不为空，那么需要给 cartInfoList 添加数据
+    if (tampList != null && tampList.length > 0) {
+      tampList.forEach((item) {
+        cartInfoList.add(new CartInfoModel.fromJson(item));
+      });
+    }
+
+    // 判断是否存在当前商品
+    bool isHaveThisGoods = false;
+
+    // 用于进行循环的索引使用
+    int ival = 0;
+    // 进行循环，找出是否已经存在该商品
+    tampList.forEach((item) {
+      debugPrint('ival 前 $ival');
+      // 如果存在，数量进行+1操作
+      if (item['goodsId'] == goodsId) {
+        debugPrint('有一样的数据，+1');
+        tampList[ival]['count'] = item['count'] + 1;
+        cartInfoList[ival].count++;
+        isHaveThisGoods = true;
+      }
+      ival++;
+    });
+
+    debugPrint('ival 后 $ival');
+
+    //  如果没有，进行增加
+    if (!isHaveThisGoods) {
+      Map<String, dynamic> newGoods = {
+        'goodsId': goodsId,
+        'goodsName': goodsName,
+        'count': count,
+        'price': presentPrice,
+        'oriPrice': oriPrice,
+        'images': images,
+        'isCheck': true
+      };
+      tampList.add(newGoods);
+      cartInfoList.add(CartInfoModel.fromJson(newGoods));
+    }
+
+    //把字符串进行encode操作，
+    cartGoodsStr = json.encode(tampList).toString();
+    debugPrint('持久化数据 字符串 $cartGoodsStr');
+    debugPrint('持久化数据 列表 $cartInfoList');
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+  }
+
+  // 清空
+  void remove() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //prefs.clear();//清空键值对
+    prefs.remove('cartInfo');
+    // 置空数据
+    cartInfoList = [];
+    debugPrint('清空完成-----------------');
+    notifyListeners();
+  }
+
+  // 得到购物车中的商品
+  getCartInfoGoods() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    //把cartList进行初始化，防止数据混乱
+    cartInfoList = [];
+
+    // 判断得到的字符串是否有值，如果不判断会报错
+    if (cartInfoStr == null) {
+      cartInfoList = [];
+    } else {
+      allPrice = 0;
+      allGoodsCount = 0;
+      isAllChecked = true;
+      var cartInfoJson = json.decode(cartInfoStr.toString());
+      List<Map> tampList = (cartInfoJson as List).cast();
+      tampList.forEach((item) {
+        if (item['isCheck']) {
+          allPrice += item['count'] * item['price'];
+          allGoodsCount += item['count'];
+        } else {
+          isAllChecked = false;
+        }
+        cartInfoList.add(new CartInfoModel.fromJson(item));
+      });
+    }
+    notifyListeners();
+  }
+
+  // 删除购物车数据
+  deleteCartInfoGoods(String goodsId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+
+    // 用于进行循环的索引使用
+    int ival = 0;
+    int delIndex = 0;
+    // 进行循环，找出是否已经存在该商品
+    tampList.forEach((item) {
+      // 如果存在，数量进行+1操作
+      if (item['goodsId'] == goodsId) {
+        delIndex = ival;
+      }
+      ival++;
+    });
+    tampList.removeAt(delIndex);
+    cartGoodsStr = json.encode(tampList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
+  }
+
+  // 修改购物车选择状态
+  checkCartInfoGoodsState(CartInfoModel cartInfoGoods) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+
+    int tempIndex = 0;
+    int currentIndex = 0;
+
+    tampList.forEach((item) {
+      if (item['goodsId'] == cartInfoGoods.goodsId) {
+        //找到索引进行复制
+        currentIndex = tempIndex;
+      }
+      tempIndex++;
+    });
+    tampList[currentIndex] = cartInfoGoods.toJson(); //把对象变成Map值
+    cartGoodsStr = json.encode(tampList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
+  }
+
+  //点击全选按钮操作
+  checkAllGoodsState(bool isCheck) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+    // Dart不让循环时修改原值
+    /*tampList.forEach((item) {
+      item['isCheck'] = true;
+    });
+    cartGoodsStr = json.encode(tampList).toString();
+    */
+    List<Map> newList = new List();
+    for(var item in tampList){
+      var newItem = item; // /复制新的变量，因为Dart不让循环时修改原值
+      newItem['isCheck'] = isCheck;
+      newList.add(newItem);
+    }
+    cartGoodsStr = json.encode(newList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
+  }
+}
+
+```
+
+### 商品单个调用
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:provide/provide.dart';
+
+import 'cart_count.dart';
+
+class CartItem extends StatelessWidget {
+  CartInfoModel cartInfoModel;
+
+  CartItem(this.cartInfoModel);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(5, 2.0, 5.0, 2.0),
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.black12,
+            width: 1,
+            style: BorderStyle.solid,
+          ),
+        ),
+      ),
+      child: Row(
+        children: <Widget>[
+          _checkBoxCartGoods(context),
+          _imageCartGoods(),
+          _cartGoodsNameCount(),
+          _cartGoodsPrice(context),
+        ],
+      ),
+    );
+  }
+
+  // 复选框
+  Widget _checkBoxCartGoods(BuildContext context) {
+    return Container(
+      child: Checkbox(
+        value: cartInfoModel.isCheck,
+        onChanged: (value) {
+          debugPrint('点击$value');
+          cartInfoModel.isCheck = value;
+          Provide.value<CartProvide>(context)
+              .checkCartInfoGoodsState(cartInfoModel);
+        },
+        checkColor: Colors.white,
+        activeColor: Colors.pink,
+      ),
+    );
+  }
+
+  // 图片
+  Widget _imageCartGoods() {
+    return Container(
+      width: ScreenUtil().setWidth(150),
+      decoration: BoxDecoration(
+        border: Border.all(width: 1, color: Colors.black12),
+      ),
+      child: Image.network(cartInfoModel.images),
+    );
+  }
+
+  // 商品名称
+  Widget _cartGoodsNameCount() {
+    return Container(
+      width: ScreenUtil().setWidth(300),
+      padding: EdgeInsets.all(10),
+      alignment: Alignment.topLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            cartInfoModel.goodsName,
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(28),
+              color: Colors.black,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+            textAlign: TextAlign.left,
+          ),
+          CartCount(),
+        ],
+      ),
+    );
+  }
+
+  // 商品价钱
+  Widget _cartGoodsPrice(BuildContext context) {
+    return Container(
+      width: ScreenUtil().setWidth(150),
+      child: Column(
+        children: <Widget>[
+          Text(
+            '￥${cartInfoModel.price}',
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(24),
+              color: Colors.black,
+            ),
+          ),
+          Text(
+            '￥${cartInfoModel.oriPrice}',
+            style: TextStyle(
+              fontSize: ScreenUtil().setSp(24),
+              color: Colors.black26,
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              debugPrint('删除数据');
+              showDeleteDialog(context);
+              /*Provide.value<CartProvide>(context)
+                  .deleteCartInfoGoods(cartInfoModel.goodsId);*/
+            },
+            child: Icon(
+              Icons.delete,
+              color: Colors.black12,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showDeleteDialog(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('删除提示'),
+          content: Text('您确定要删除“${cartInfoModel.goodsName}”这个商品么？'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('确定'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Provide.value<CartProvide>(context)
+                    .deleteCartInfoGoods(cartInfoModel.goodsId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+```
+
+
+### 商品全部调用
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:provide/provide.dart';
+
+class CartBottom extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: ScreenUtil().setWidth(750),
+      padding: EdgeInsets.all(5.0),
+      color: Colors.white,
+      child: Provide<CartProvide>(
+        builder: (context, child, cartProvide) {
+          return Row(
+            children: <Widget>[
+              _checkBoxAll(context),
+              _allPrice(context),
+              _allPayAll(context),
+              //_goPayAll(),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // 全选
+  Widget _checkBoxAll(BuildContext context) {
+    return Provide<CartProvide>(
+      builder: (context, child, carProvide) {
+        return Container(
+          child: Row(
+            children: <Widget>[
+              Checkbox(
+                onChanged: (value) {
+                  debugPrint('点击全选 $value');
+                  carProvide.checkAllGoodsState(value);
+                },
+                value: carProvide.isAllChecked,
+                activeColor: Colors.pink,
+                checkColor: Colors.white,
+              ),
+              Text(
+                '全选',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: ScreenUtil().setSp(24),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 价格
+  Widget _allPrice(BuildContext context) {
+    double allPrice = Provide.value<CartProvide>(context).allPrice;
+    return Container(
+      width: ScreenUtil().setWidth(400),
+      alignment: Alignment.centerRight,
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '合计：',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(24),
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '￥$allPrice',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(30),
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '满10元免配送费，预购免配送费',
+              style: TextStyle(
+                fontSize: ScreenUtil().setSp(22),
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 结算
+  Widget _allPayAll(BuildContext context) {
+    int allGoodsCount = Provide.value<CartProvide>(context).allGoodsCount;
+
+    return Container(
+      width: ScreenUtil().setWidth(150),
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(left: 10),
+      child: MaterialButton(
+        onPressed: () {},
+        child: Text(
+          '结算($allGoodsCount)',
+        ),
+        color: Colors.red,
+        textColor: Colors.white,
+      ),
+    );
+  }
+
+  // 或者自己做button
+  Widget _goPayAll() {
+    return Container(
+      width: ScreenUtil().setWidth(150),
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(left: 10),
+      child: InkWell(
+        onTap: () {
+          debugPrint('自己画button');
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.all(
+              Radius.circular(3),
+            ),
+          ),
+          child: Text(
+            '结算(6)',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+```
+
+### 购物车页面优化
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/model/cartInfoModel.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:provide/provide.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_shop_mall/pages/cart_page/cart_item.dart';
+
+import 'cart_page/cart_bottom.dart';
+
+class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('商品购物车'),
+      ),
+      body: FutureBuilder(
+        future: _getCartGoods(context),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            debugPrint('购物车 有数据');
+            return Provide<CartProvide>(
+              builder: (context, child, cartProvide) {
+                List<CartInfoModel> listCartGoods =
+                    Provide.value<CartProvide>(context).cartInfoList;
+                if (listCartGoods != null && listCartGoods.length > 0) {
+                  debugPrint('购物车 有数据 不为空');
+                  return Stack(children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.black12,
+                                width: 1,
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                          ),
+                          height: ScreenUtil().setHeight(1),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: ListView.builder(
+                            itemCount: listCartGoods.length,
+                            itemBuilder: (context, index) {
+                              return CartItem(listCartGoods[index]);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      child: CartBottom(),
+                    ),
+                  ]);
+                } else {
+                  return Center(
+                    child: Text(
+                      '当前购物车为空',
+                      style: TextStyle(
+                        fontSize: ScreenUtil().setSp(30),
+                        color: Colors.black12,
+                      ),
+                    ),
+                  );
+                }
+              },
+            );
+          } else {
+            debugPrint('购物车 没有数据');
+            return Center(
+              child: Text(
+                '当前购物车为空',
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(30),
+                  color: Colors.black12,
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<String> _getCartGoods(BuildContext context) async {
+    await Provide.value<CartProvide>(context).getCartInfoGoods();
+    return "完成加载";
+  }
+}
+
+```
+
 
 ## 后端接口API文档
 

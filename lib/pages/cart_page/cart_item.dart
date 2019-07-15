@@ -45,6 +45,8 @@ class CartItem extends StatelessWidget {
         onChanged: (value) {
           debugPrint('点击$value');
           cartInfoModel.isCheck = value;
+          Provide.value<CartProvide>(context)
+              .checkCartInfoGoodsState(cartInfoModel);
         },
         checkColor: Colors.white,
         activeColor: Colors.pink,
@@ -146,7 +148,8 @@ class CartItem extends StatelessWidget {
               child: Text('确定'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Provide.value<CartProvide>(context).deleteCartInfoGoods(cartInfoModel.goodsId);
+                Provide.value<CartProvide>(context)
+                    .deleteCartInfoGoods(cartInfoModel.goodsId);
               },
             ),
           ],

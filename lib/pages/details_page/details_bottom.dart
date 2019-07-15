@@ -41,6 +41,13 @@ class DetailsBottom extends StatelessWidget {
               debugPrint('加入购物车');
               Provide.value<CartProvide>(context).save(
                   goodsId, goodsName, count, presentPrice, oriPrice, images);
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text('添加购物车成功！'),
+                action: SnackBarAction(
+                  label: 'ok',
+                  onPressed: () {},
+                ),
+              ));
             },
             child: Container(
               height: ScreenUtil().setHeight(100),

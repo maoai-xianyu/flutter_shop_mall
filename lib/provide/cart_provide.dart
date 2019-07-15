@@ -8,6 +8,7 @@ class CartProvide extends ChangeNotifier {
   List<CartInfoModel> cartInfoList = [];
   double allPrice = 0;
   int allGoodsCount = 0;
+  bool isAllChecked = true; // 全选，默认是true
 
   void save(String goodsId, String goodsName, int count, double presentPrice,
       double oriPrice, String images) async {
@@ -93,12 +94,15 @@ class CartProvide extends ChangeNotifier {
     } else {
       allPrice = 0;
       allGoodsCount = 0;
+      isAllChecked = true;
       var cartInfoJson = json.decode(cartInfoStr.toString());
       List<Map> tampList = (cartInfoJson as List).cast();
       tampList.forEach((item) {
-        if(item['isCheck']){
-          allPrice+= item['count']*item['price'];
+        if (item['isCheck']) {
+          allPrice += item['count'] * item['price'];
           allGoodsCount += item['count'];
+        } else {
+          isAllChecked = false;
         }
         cartInfoList.add(new CartInfoModel.fromJson(item));
       });
@@ -126,6 +130,52 @@ class CartProvide extends ChangeNotifier {
     });
     tampList.removeAt(delIndex);
     cartGoodsStr = json.encode(tampList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
+  }
+
+  // 修改购物车选择状态
+  checkCartInfoGoodsState(CartInfoModel cartInfoGoods) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+
+    int tempIndex = 0;
+    int currentIndex = 0;
+
+    tampList.forEach((item) {
+      if (item['goodsId'] == cartInfoGoods.goodsId) {
+        //找到索引进行复制
+        currentIndex = tempIndex;
+      }
+      tempIndex++;
+    });
+    tampList[currentIndex] = cartInfoGoods.toJson(); //把对象变成Map值
+    cartGoodsStr = json.encode(tampList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
+  }
+
+  //点击全选按钮操作
+  checkAllGoodsState(bool isCheck) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+    // Dart不让循环时修改原值
+    /*tampList.forEach((item) {
+      item['isCheck'] = true;
+    });
+    cartGoodsStr = json.encode(tampList).toString();
+    */
+    List<Map> newList = new List();
+    for(var item in tampList){
+      var newItem = item; // /复制新的变量，因为Dart不让循环时修改原值
+      newItem['isCheck'] = isCheck;
+      newList.add(newItem);
+    }
+    cartGoodsStr = json.encode(newList).toString();
     prefs.setString('cartInfo', cartGoodsStr); //进行持久化
     await getCartInfoGoods();
   }

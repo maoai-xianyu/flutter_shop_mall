@@ -27,27 +27,32 @@ class CartBottom extends StatelessWidget {
 
   // 全选
   Widget _checkBoxAll(BuildContext context) {
-    return Container(
-      child: Row(
-        children: <Widget>[
-          Checkbox(
-            onChanged: (value) {
-              debugPrint('点击全选');
-            },
-            value: true,
-            activeColor: Colors.pink,
-            checkColor: Colors.white,
+    return Provide<CartProvide>(
+      builder: (context, child, carProvide) {
+        return Container(
+          child: Row(
+            children: <Widget>[
+              Checkbox(
+                onChanged: (value) {
+                  debugPrint('点击全选 $value');
+                  carProvide.checkAllGoodsState(value);
+                },
+                value: carProvide.isAllChecked,
+                activeColor: Colors.pink,
+                checkColor: Colors.white,
+              ),
+              Text(
+                '全选',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: ScreenUtil().setSp(24),
+                ),
+              ),
+            ],
           ),
-          Text(
-            '全选',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: ScreenUtil().setSp(24),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
