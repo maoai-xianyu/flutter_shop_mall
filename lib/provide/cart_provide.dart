@@ -31,6 +31,10 @@ class CartProvide extends ChangeNotifier {
     // 判断是否存在当前商品
     bool isHaveThisGoods = false;
 
+    // 初始化
+    allPrice = 0;
+    allGoodsCount = 0;
+
     // 用于进行循环的索引使用
     int ival = 0;
     // 进行循环，找出是否已经存在该商品
@@ -43,6 +47,12 @@ class CartProvide extends ChangeNotifier {
         cartInfoList[ival].count++;
         isHaveThisGoods = true;
       }
+      // 循环添加数据
+      if (item['isCheck']) {
+        allPrice += (cartInfoList[ival].price * cartInfoList[ival].count);
+        allGoodsCount += cartInfoList[ival].count;
+      }
+
       ival++;
     });
 
@@ -61,6 +71,10 @@ class CartProvide extends ChangeNotifier {
       };
       tampList.add(newGoods);
       cartInfoList.add(CartInfoModel.fromJson(newGoods));
+
+      // 新添加数据加入
+      allPrice += count * presentPrice;
+      allGoodsCount += count;
     }
 
     //把字符串进行encode操作，
@@ -68,6 +82,7 @@ class CartProvide extends ChangeNotifier {
     debugPrint('持久化数据 字符串 $cartGoodsStr');
     debugPrint('持久化数据 列表 $cartInfoList');
     prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    notifyListeners();
   }
 
   // 清空

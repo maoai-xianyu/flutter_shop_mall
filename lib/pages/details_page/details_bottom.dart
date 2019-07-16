@@ -22,22 +22,53 @@ class DetailsBottom extends StatelessWidget {
       height: ScreenUtil().setHeight(100),
       child: Row(
         children: <Widget>[
-          InkWell(
-            onTap: () {
-              debugPrint('点击购物车');
-              Provide.value<CurrentIndexProvide>(context).changeCurrentIndex(2);
-              Navigator.pop(context);
-            },
-            child: Container(
-              height: ScreenUtil().setHeight(100),
-              width: ScreenUtil().setHeight(110),
-              color: Colors.white,
-              child: Icon(
-                Icons.shopping_cart,
-                size: 30,
-                color: Colors.pink,
+          Stack(
+            children: <Widget>[
+              InkWell(
+                onTap: () {
+                  debugPrint('点击购物车');
+                  Provide.value<CurrentIndexProvide>(context)
+                      .changeCurrentIndex(2);
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  height: ScreenUtil().setHeight(100),
+                  width: ScreenUtil().setHeight(110),
+                  color: Colors.white,
+                  child: Icon(
+                    Icons.shopping_cart,
+                    size: 30,
+                    color: Colors.pink,
+                  ),
+                ),
               ),
-            ),
+              Provide<CartProvide>(
+                builder: (context, child, cartProvide) {
+                  var allGoodsCount = cartProvide.allGoodsCount;
+                  return Positioned(
+                    top: 2,
+                    right: 12,
+                    child: Container(
+                      padding:EdgeInsets.fromLTRB(6, 3, 6, 3),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        border: Border.all(
+                          color: Colors.white,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '$allGoodsCount',
+                        style: TextStyle(
+                          fontSize: ScreenUtil().setSp(16),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              )
+            ],
           ),
           InkWell(
             onTap: () async {
