@@ -7,7 +7,7 @@ import 'package:provide/provide.dart';
 import 'cart_count.dart';
 
 class CartItem extends StatelessWidget {
-  CartInfoModel cartInfoModel;
+  final CartInfoModel cartInfoModel;
 
   CartItem(this.cartInfoModel);
 
@@ -84,7 +84,7 @@ class CartItem extends StatelessWidget {
             maxLines: 2,
             textAlign: TextAlign.left,
           ),
-          CartCount(),
+          CartCount(cartInfoModel),
         ],
       ),
     );

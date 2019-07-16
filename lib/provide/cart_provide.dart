@@ -170,12 +170,41 @@ class CartProvide extends ChangeNotifier {
     cartGoodsStr = json.encode(tampList).toString();
     */
     List<Map> newList = new List();
-    for(var item in tampList){
+    for (var item in tampList) {
       var newItem = item; // /复制新的变量，因为Dart不让循环时修改原值
       newItem['isCheck'] = isCheck;
       newList.add(newItem);
     }
     cartGoodsStr = json.encode(newList).toString();
+    prefs.setString('cartInfo', cartGoodsStr); //进行持久化
+    await getCartInfoGoods();
+  }
+
+  // 增加和减少的操作
+  goodsCountReduceAndAdd(CartInfoModel cartInfoGoods, String todo) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var cartInfoStr = prefs.getString('cartInfo');
+    var cartInfoJson = json.decode(cartInfoStr.toString());
+    List<Map> tampList = (cartInfoJson as List).cast();
+
+    int tempIndex = 0;
+    int currentIndex = 0;
+
+    tampList.forEach((item) {
+      if (item['goodsId'] == cartInfoGoods.goodsId) {
+        currentIndex = tempIndex;
+      }
+      tempIndex++;
+    });
+
+    if (todo == "add") {
+      cartInfoGoods.count++;
+    } else if (cartInfoGoods.count > 1) {
+      cartInfoGoods.count--;
+    }
+
+    tampList[currentIndex] = cartInfoGoods.toJson();
+    cartGoodsStr = json.encode(tampList).toString();
     prefs.setString('cartInfo', cartGoodsStr); //进行持久化
     await getCartInfoGoods();
   }
