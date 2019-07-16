@@ -8131,6 +8131,250 @@ class CartCount extends StatelessWidget {
 
 ```
 
+## 第62节：购物车_首页Provide化 让跳转随心所欲
+
+
+### 首页状态管理
+```
+import 'package:flutter/material.dart';
+
+class CurrentIndexProvide extends ChangeNotifier {
+  int currentIndex = 0;
+
+  changeCurrentIndex(int newIndex) {
+    currentIndex = newIndex;
+    notifyListeners();
+  }
+}
+
+```
+
+### 主入口文件
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:flutter_shop_mall/provide/current_index_provide.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:flutter_shop_mall/routers/application.dart';
+import 'package:flutter_shop_mall/routers/routers.dart';
+import './pages/index_page.dart';
+import 'package:provide/provide.dart';
+import 'provide/counter_provide.dart';
+import 'provide/child_category_provide.dart';
+import 'provide/category_list_provide.dart';
+import 'package:fluro/fluro.dart';
+
+void main() {
+  var counter = CounterProvide(0);
+  var childCategory = ChildCategoryProvide();
+  var categoryGoodsListProvide = CategoryListProvide();
+  var detailsGoodsProvide = DetailsGoodsProvide();
+  var cartProvide = CartProvide();
+  var currentIndexProvide = CurrentIndexProvide();
+  var providers = Providers()
+    ..provide(Provider<CounterProvide>.value(counter))
+    ..provide(Provider<ChildCategoryProvide>.value(childCategory))
+    ..provide(Provider.function((context) => categoryGoodsListProvide))
+    ..provide(Provider.function((context) => detailsGoodsProvide))
+    ..provide(Provider.function((context) => cartProvide))
+    ..provide(Provider.function((context) => currentIndexProvide));
+  runApp(ProviderNode(
+    child: MyApp(),
+    providers: providers,
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // 路由配置
+    var router = new Router();
+    Routers.configureRouters(router);
+    Application.router = router;
+
+    return Container(
+      child: MaterialApp(
+        title: '百姓生活+',
+        // 配置路由
+        onGenerateRoute: Application.router.generator,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.pink,
+        ),
+        home: IndexPage(),
+      ),
+    );
+  }
+}
+
+```
+
+### index 状态管理
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_shop_mall/provide/current_index_provide.dart';
+import 'package:provide/provide.dart';
+import 'home_page.dart';
+import 'category_page.dart';
+import 'cart_page.dart';
+import 'member_page.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class IndexPage extends StatelessWidget {
+  final List<BottomNavigationBarItem> bottomBars = [
+    BottomNavigationBarItem(
+      icon: Icon(CupertinoIcons.home),
+      title: Text('首页'),
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(CupertinoIcons.search),
+      title: Text('分类'),
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(CupertinoIcons.shopping_cart),
+      title: Text('购物车'),
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(CupertinoIcons.profile_circled),
+      title: Text('首页'),
+    ),
+  ];
+
+  final List<Widget> tabBodies = [
+    HomePage(),
+    CategoryPage(),
+    CartPage(),
+    MemberPage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    ScreenUtil.instance = ScreenUtil(width: 750, height: 1334)..init(context);
+    return Provide<CurrentIndexProvide>(
+      builder: (context, child, currentIndexProvide) {
+        int _currentIndex = currentIndexProvide.currentIndex;
+        return Scaffold(
+          backgroundColor: Color.fromRGBO(244, 245, 245, 1.0),
+          // 保持页面状态
+          body: IndexedStack(
+            children: tabBodies,
+            index: _currentIndex,
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            items: bottomBars,
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              Provide.value<CurrentIndexProvide>(context).changeCurrentIndex(index);
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+```
+
+### 商品详细页面添加购物车跳转
+
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:flutter_shop_mall/provide/current_index_provide.dart';
+import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
+import 'package:provide/provide.dart';
+
+class DetailsBottom extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var goodsInfo =
+        Provide.value<DetailsGoodsProvide>(context).detailsGoods.data.goodInfo;
+    var goodsId = goodsInfo.goodsId;
+    var goodsName = goodsInfo.goodsName;
+    var count = 1;
+    var presentPrice = goodsInfo.presentPrice;
+    var oriPrice = goodsInfo.oriPrice;
+    var images = goodsInfo.image1;
+
+    return Container(
+      width: ScreenUtil().setWidth(750),
+      height: ScreenUtil().setHeight(100),
+      child: Row(
+        children: <Widget>[
+          InkWell(
+            onTap: () {
+              debugPrint('点击购物车');
+              Provide.value<CurrentIndexProvide>(context).changeCurrentIndex(2);
+              Navigator.pop(context);
+            },
+            child: Container(
+              height: ScreenUtil().setHeight(100),
+              width: ScreenUtil().setHeight(110),
+              color: Colors.white,
+              child: Icon(
+                Icons.shopping_cart,
+                size: 30,
+                color: Colors.pink,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () async {
+              debugPrint('加入购物车');
+              Provide.value<CartProvide>(context).save(
+                  goodsId, goodsName, count, presentPrice, oriPrice, images);
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text('添加购物车成功！'),
+                action: SnackBarAction(
+                  label: 'ok',
+                  onPressed: () {},
+                ),
+              ));
+            },
+            child: Container(
+              height: ScreenUtil().setHeight(100),
+              width: ScreenUtil().setHeight(320),
+              color: Colors.green,
+              alignment: Alignment(0, 0),
+              child: Text(
+                '加入购物车',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ScreenUtil().setSp(30),
+                ),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () async {
+              debugPrint('立即购买');
+              Provide.value<CartProvide>(context).remove();
+            },
+            child: Container(
+              height: ScreenUtil().setHeight(100),
+              width: ScreenUtil().setHeight(320),
+              color: Colors.red,
+              alignment: Alignment(0, 0),
+              child: Text(
+                '立即购买',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ScreenUtil().setSp(30),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+```
+
 ## 后端接口API文档
 
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_shop_mall/provide/cart_provide.dart';
+import 'package:flutter_shop_mall/provide/current_index_provide.dart';
 import 'package:flutter_shop_mall/provide/details_goods_provide.dart';
 import 'package:provide/provide.dart';
 
@@ -24,6 +25,8 @@ class DetailsBottom extends StatelessWidget {
           InkWell(
             onTap: () {
               debugPrint('点击购物车');
+              Provide.value<CurrentIndexProvide>(context).changeCurrentIndex(2);
+              Navigator.pop(context);
             },
             child: Container(
               height: ScreenUtil().setHeight(100),
