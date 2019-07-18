@@ -22,7 +22,16 @@ class MemberPage extends StatelessWidget {
   Widget _headerWidget() {
     return Container(
       width: ScreenUtil().setWidth(750),
-      color: Colors.redAccent,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.redAccent,
+            Colors.pink,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
       child: Column(
         children: <Widget>[
           Container(
