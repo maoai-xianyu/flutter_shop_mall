@@ -9573,6 +9573,181 @@ class MemberPage extends StatelessWidget {
 
 ```
 
+## 第65节：会员中心_订单区域UI编写
+
+### order
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class OrderDetail extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        debugPrint('我的订单');
+      },
+      child: Container(
+        margin: EdgeInsets.only(top: 10),
+        width: ScreenUtil().setWidth(750),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.black12,
+              style: BorderStyle.solid,
+              width: 1,
+            ),
+          ),
+        ),
+        child: ListTile(
+          leading: Icon(Icons.payment),
+          title: Text('我的订单'),
+          trailing: Icon(Icons.arrow_right),
+        ),
+      ),
+    );
+  }
+}
+
+```
+
+### order tap
+```
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class OrderDetailTap extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 20,
+        bottom: 20,
+      ),
+      height: ScreenUtil().setHeight(200),
+      child: GridView.count(
+        crossAxisCount: 4,
+        children: <Widget>[
+          InkWell(
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.payment,
+                    size: 32,
+                  ),
+                  SizedBox(
+                    height: ScreenUtil().setHeight(10),
+                  ),
+                  Text(
+                    "待付款",
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(24),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          InkWell(
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.timer,
+                    size: 32,
+                  ),
+                  SizedBox(
+                    height: ScreenUtil().setHeight(10),
+                  ),
+                  Text(
+                    "待发货",
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(24),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          InkWell(
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.flight_takeoff,
+                    size: 32,
+                  ),
+                  SizedBox(
+                    height: ScreenUtil().setHeight(10),
+                  ),
+                  Text(
+                    "待收货",
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(24),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          InkWell(
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.comment,
+                    size: 32,
+                  ),
+                  SizedBox(
+                    height: ScreenUtil().setHeight(10),
+                  ),
+                  Text(
+                    "待评价",
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(24),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+```
+
+### 调用
+
+```
+import 'package:flutter/material.dart';
+import 'member_page/member_header.dart';
+import 'member_page/order_detail.dart';
+import 'member_page/order_detail_tap.dart';
+
+class MemberPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('会员中心'),
+      ),
+      body: ListView(
+        children: <Widget>[
+          MemberHeader(),
+          OrderDetail(),
+          OrderDetailTap(),
+        ],
+      ),
+    );
+  }
+}
+
+```
 
 ### 火爆专区商品列表
 
