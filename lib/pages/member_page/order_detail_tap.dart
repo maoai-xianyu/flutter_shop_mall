@@ -5,11 +5,12 @@ class OrderDetailTap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Colors.white,
       padding: EdgeInsets.only(
         top: 20,
         bottom: 20,
       ),
-      height: ScreenUtil().setHeight(200),
+      height: ScreenUtil().setHeight(180),
       child: GridView.count(
         crossAxisCount: 4,
         children: <Widget>[

@@ -9749,6 +9749,114 @@ class MemberPage extends StatelessWidget {
 
 ```
 
+## 第66节:会员中心_编写ListTile的通用方法
+
+### ListTile通用方法
+```
+import 'package:flutter/material.dart';
+
+class MemberCommonTap extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subTitle;
+  final String type;
+  final bool isShowSub;
+
+  MemberCommonTap(
+      this.icon, this.title, this.subTitle, this.type, this.isShowSub);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: ListTile(
+        onTap: () {
+          switch (type) {
+            case '1':
+              break;
+
+            case '2':
+              break;
+
+            case '3':
+              break;
+
+            case '4':
+              break;
+            default:
+              break;
+          }
+        },
+        leading: Icon(icon),
+        title: Text(title),
+        //subtitle: isShowSub ? Text(subTitle) : Text(''),
+        trailing: Icon(Icons.arrow_right),
+      ),
+    );
+  }
+}
+
+```
+
+### 调用
+```
+import 'package:flutter/material.dart';
+import 'member_page/member_common_tap.dart';
+import 'member_page/member_header.dart';
+import 'member_page/order_detail.dart';
+import 'member_page/order_detail_tap.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class MemberPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('会员中心'),
+      ),
+      body: ListView(
+        children: <Widget>[
+          MemberHeader(),
+          OrderDetail(),
+          OrderDetailTap(),
+          SizedBox(
+            height: ScreenUtil().setHeight(30),
+          ),
+          MemberCommonTap(Icons.headset, '领取优惠卷', '', '1', false),
+          SizedBox(
+            height: ScreenUtil().setHeight(1),
+            child: Container(
+              color: Colors.black12,
+            ),
+          ),
+          MemberCommonTap(Icons.hearing, '已领取优惠卷', '', '2', false),
+          SizedBox(
+            height: ScreenUtil().setHeight(1),
+            child: Container(
+              color: Colors.black12,
+            ),
+          ),
+          MemberCommonTap(Icons.add_location, '地址管理', '', '3', false),
+          SizedBox(
+            height: ScreenUtil().setHeight(30),
+          ),
+          MemberCommonTap(Icons.contact_phone, '客服电话', '0392-8800315', '4', true),
+          SizedBox(
+            height: ScreenUtil().setHeight(1),
+            child: Container(
+              color: Colors.black12,
+            ),
+          ),
+          MemberCommonTap(Icons.shop, '关于商城', '', '5', false),
+        ],
+      ),
+    );
+  }
+}
+
+```
+
+
 ### 火爆专区商品列表
 
 - 参数：page
