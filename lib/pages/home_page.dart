@@ -1,5 +1,6 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_shop_mall/routers/application.dart';
 import 'package:flutter_shop_mall/routers/routers.dart';
 import '../service/service_method.dart';
@@ -7,8 +8,6 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert'; // 导入json
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_easyrefresh/easy_refresh.dart';
-import 'package:flutter_easyrefresh/material_footer.dart';
 import 'package:flutter_easyrefresh/material_header.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,10 +22,8 @@ class _HomePageState extends State<HomePage>
 
   int page = 1;
   List<Map> _hotGoods = [];
-  GlobalKey<RefreshHeaderState> _headerKey =
-      new GlobalKey<RefreshHeaderState>();
-  GlobalKey<RefreshFooterState> _footerKey =
-      new GlobalKey<RefreshFooterState>();
+  GlobalKey _headerKey = new GlobalKey();
+  GlobalKey _footerKey = new GlobalKey();
 
   @override
   bool get wantKeepAlive => true;
@@ -93,7 +90,7 @@ class _HomePageState extends State<HomePage>
                   _HotGoods(),
                 ],
               ),
-              refreshHeader: MaterialHeader(
+              header: MaterialHeader(
                 key: _headerKey,
                 backgroundColor: Colors.white,
               ),
@@ -104,21 +101,18 @@ class _HomePageState extends State<HomePage>
                 });
               },
               // 上拉加载，footer设置
-              refreshFooter: ClassicsFooter(
+              footer: ClassicalFooter(
                 key: _footerKey,
                 bgColor: Colors.white,
                 textColor: Colors.pink,
-                moreInfoColor: Colors.pink,
-                showMore: true,
                 noMoreText: '',
-                moreInfo: '加载...',
                 loadReadyText: '上拉加载开始...',
                 loadingText: '加载中',
                 loadedText: '加载完成...',
                 loadText: '上拉加载...',
               ),
               // 上拉加载
-              loadMore: () async {
+              onLoad: () async {
                 debugPrint('获取火爆专区的数据，开始加载更多....');
                 await getHomePageHotContent(page).then((value) {
                   debugPrint(value);
@@ -262,8 +256,6 @@ class SwiperDiy extends StatelessWidget {
     print('设备的像素密度${ScreenUtil.pixelRatio}');
     print('设备的高 px ${ScreenUtil.screenHeight}');
     print('设备的宽 px ${ScreenUtil.screenWidth}');
-    print('设备的高 dp ${ScreenUtil.screenHeightDp}');
-    print('设备的宽 dp ${ScreenUtil.screenWidthDp}');
     return Container(
       height: ScreenUtil().setHeight(333),
       width: ScreenUtil().setWidth(750),

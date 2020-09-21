@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_shop_mall/provide/category_list_provide.dart';
 import 'package:flutter_shop_mall/provide/child_category_provide.dart';
 import 'package:flutter_shop_mall/routers/application.dart';
@@ -6,11 +7,9 @@ import 'package:flutter_shop_mall/routers/routers.dart';
 import 'package:flutter_shop_mall/service/service_method.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // 适配
-import '../model/categoryListModel.dart';
 import '../model/categoryConvert.dart';
 import '../model/categoryGoodsListModel.dart';
 import 'package:provide/provide.dart';
-import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
 
@@ -260,11 +259,9 @@ class CategoryGoodsList extends StatefulWidget {
 
 class _CategoryGoodsListState extends State<CategoryGoodsList> {
   List<CategoryGoodsListModelData> categoryGoodsList = [];
-  GlobalKey<RefreshFooterState> _footerKey =
-      new GlobalKey<RefreshFooterState>();
+  GlobalKey _footerKey = new GlobalKey();
 
-  GlobalKey<EasyRefreshState> _easyRefreshKey =
-      new GlobalKey<EasyRefreshState>();
+  GlobalKey _easyRefreshKey = new GlobalKey();
 
   var _scrollController = new ScrollController();
 
@@ -296,22 +293,19 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
               ),
               key: _easyRefreshKey,
               // 上拉加载，footer设置
-              refreshFooter: ClassicsFooter(
+              footer: ClassicalFooter(
                 key: _footerKey,
                 bgColor: Colors.white,
                 textColor: Colors.pink,
-                moreInfoColor: Colors.pink,
-                showMore: true,
                 noMoreText:
                     Provide.value<ChildCategoryProvide>(context).noMoreText,
                 //moreInfo: '加载...',
-                moreInfo: '...',
                 loadReadyText: '上拉加载开始',
                 loadingText: '加载中',
                 //loadedText: '加载完成...',
                 //loadText: '上拉加载...',
               ),
-              loadMore: () async {
+              onLoad: () async {
                 debugPrint('上拉获取更多数据');
                 _getGoodsMoreList();
               },
@@ -342,7 +336,7 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
           msg: '没有更多数据了',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          timeInSecForIos: 1,
+          timeInSecForIosWeb: 1,
           backgroundColor: Colors.pink,
           textColor: Colors.white,
           fontSize: ScreenUtil().setSp(16),
